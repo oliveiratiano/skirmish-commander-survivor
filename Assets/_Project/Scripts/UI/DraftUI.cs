@@ -12,6 +12,7 @@ public class DraftUI : MonoBehaviour
     GUIStyle _boxStyle;
     GUIStyle _buttonStyle;
     GUIStyle _labelStyle;
+    GUIStyle _versionStyle;
 
     void Awake()
     {
@@ -80,6 +81,10 @@ public class DraftUI : MonoBehaviour
         {
             StartBattle();
         }
+
+        // Version display at bottom of screen
+        GUI.Label(new Rect(10f, Screen.height - 25f, Screen.width - 20f, 20f),
+            BuildVersion.FullString, _versionStyle);
     }
 
     void StartBattle()
@@ -118,6 +123,11 @@ public class DraftUI : MonoBehaviour
         _labelStyle = new GUIStyle(GUI.skin.label);
         _labelStyle.fontSize = 16;
         _labelStyle.normal.textColor = Color.white;
+
+        _versionStyle = new GUIStyle(GUI.skin.label);
+        _versionStyle.fontSize = 11;
+        _versionStyle.normal.textColor = new Color(0.5f, 0.5f, 0.5f);
+        _versionStyle.alignment = TextAnchor.LowerLeft;
     }
 
     Texture2D MakeTex(int w, int h, Color col)
