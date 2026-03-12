@@ -15,9 +15,9 @@ MonoBehaviour:
   unitName: Swarm Bug
   unitColor: {r: 0.7, g: 0.2, b: 0.1, a: 1}
   cost: 0
-  maxHP: 15
-  moveSpeed: 3.5
-  damage: 5
+  maxHP: 20
+  moveSpeed: 4
+  damage: 7
   range: 3
   accuracySpreadDegrees: 15
   cooldown: 1.2
