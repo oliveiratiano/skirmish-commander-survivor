@@ -11,10 +11,10 @@ public class UnitAIController : MonoBehaviour
     HealthComponent _health;
     RangedAttackComponent _attack;
 
-    // Shoot-preparation state for Follow mode
     float _shootPrepTimer;
     bool _isPreparingToShoot;
-    const float SHOOT_PREP_DURATION = 0.3f;
+    bool _prepComplete;
+    const float SHOOT_PREP_DURATION = 0.5f;
 
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
@@ -86,18 +86,23 @@ public class UnitAIController : MonoBehaviour
 
     void HandleEngage()
     {
-        _isPreparingToShoot = false;
-
         Transform nearest = FindNearest(AllEnemyUnits);
-        if (nearest == null) { _movement.Stop(); return; }
+        if (nearest == null)
+        {
+            ResetPrep();
+            _movement.Stop();
+            return;
+        }
 
         float dist = (nearest.position - transform.position).magnitude;
         if (data != null && dist <= data.range)
         {
             _movement.Stop();
+            RunShootPrep();
         }
         else
         {
+            ResetPrep();
             Vector3 dir = (nearest.position - transform.position).normalized;
             _movement.Move(dir);
         }
@@ -107,7 +112,6 @@ public class UnitAIController : MonoBehaviour
     {
         if (CommanderController.Instance == null) return;
 
-        // Check for enemies in range — if found, enter shoot-preparation
         bool enemyInRange = false;
         if (_attack != null && data != null)
         {
@@ -121,55 +125,78 @@ public class UnitAIController : MonoBehaviour
 
         if (enemyInRange)
         {
-            if (!_isPreparingToShoot)
-            {
-                _isPreparingToShoot = true;
-                _shootPrepTimer = SHOOT_PREP_DURATION;
-            }
-
-            _shootPrepTimer -= Time.deltaTime;
             _movement.Stop();
+            RunShootPrep();
 
-            if (_shootPrepTimer <= 0f && _attack != null && _attack.IsShooting)
-            {
-                // Still shooting — stay stopped
-                return;
-            }
-
-            if (_shootPrepTimer <= 0f && _attack != null && !_attack.IsShooting)
-            {
-                // Done shooting — resume movement
-                _isPreparingToShoot = false;
-            }
+            if (_prepComplete && _attack != null && !_attack.IsShooting)
+                ResetPrep();
         }
         else
         {
-            _isPreparingToShoot = false;
+            ResetPrep();
             MoveTowardCommander(0.85f);
         }
     }
 
     void HandleRetreat()
     {
-        _isPreparingToShoot = false;
+        ResetPrep();
+        if (_attack != null)
+            _attack.CanFire = false;
         MoveTowardCommander(1f);
     }
 
     void UpdateEnemyUnit()
     {
         Transform nearest = FindNearestAnyUnit();
-        if (nearest == null) { _movement.Stop(); return; }
+        if (nearest == null)
+        {
+            ResetPrep();
+            _movement.Stop();
+            return;
+        }
 
         float dist = (nearest.position - transform.position).magnitude;
         if (data != null && dist <= data.range)
         {
             _movement.Stop();
+            RunShootPrep();
         }
         else
         {
+            ResetPrep();
             Vector3 dir = (nearest.position - transform.position).normalized;
             _movement.Move(dir);
         }
+    }
+
+    void RunShootPrep()
+    {
+        if (_attack == null) return;
+
+        if (!_isPreparingToShoot)
+        {
+            _isPreparingToShoot = true;
+            _prepComplete = false;
+            _shootPrepTimer = SHOOT_PREP_DURATION;
+            _attack.CanFire = false;
+        }
+
+        _shootPrepTimer -= Time.deltaTime;
+
+        if (_shootPrepTimer <= 0f && !_prepComplete)
+        {
+            _prepComplete = true;
+            _attack.CanFire = true;
+        }
+    }
+
+    void ResetPrep()
+    {
+        _isPreparingToShoot = false;
+        _prepComplete = false;
+        if (_attack != null)
+            _attack.CanFire = false;
     }
 
     void MoveTowardCommander(float urgency)

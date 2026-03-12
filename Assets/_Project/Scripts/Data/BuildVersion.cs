@@ -1,12 +1,17 @@
 public static class BuildVersion
 {
-    public const string VERSION = "0.2.0";
+    public const string VERSION = "0.2.1";
     public const string DATE = "2026-03-12";
-    public const string LABEL = "Arena Bounds + Difficulty Tuning";
+    public const string LABEL = "Shoot Prep Fix";
 
     public static string FullString => $"v{VERSION} ({DATE}) - {LABEL}";
 
     // Version History (newest first)
+    // v0.2.1  2026-03-12  Shoot Prep Fix
+    //   - All units (player + enemy) pause 0.5s before firing
+    //   - CanFire gate on RangedAttackComponent wired to AI shoot-prep
+    //   - Commander exempt — fires instantly
+    //
     // v0.2.0  2026-03-12  Arena Bounds + Difficulty Tuning
     //   - Bounded arena (120x120) with danger zone boundary
     //   - Swarm Bug retuned: HP 20, speed 4.0, damage 7

@@ -13,6 +13,7 @@ public class RangedAttackComponent : MonoBehaviour
     static GameObject _projectilePrefab;
 
     public bool IsShooting => _isBursting;
+    public bool CanFire { get; set; } = true;
 
     void Update()
     {
@@ -40,6 +41,7 @@ public class RangedAttackComponent : MonoBehaviour
             return;
         }
 
+        if (!CanFire) return;
         if (_cooldownTimer > 0f) return;
 
         Transform target = FindTarget();
