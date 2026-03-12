@@ -6,9 +6,9 @@ public class WaveManager : MonoBehaviour
 
     [Header("Wave Config")]
     public UnitData enemyData;
-    public int totalEnemies = 60;
-    public float baseSpawnInterval = 2f;
-    public float minSpawnInterval = 0.3f;
+    public int totalEnemies = 100;
+    public float baseSpawnInterval = 1.5f;
+    public float minSpawnInterval = 0.2f;
 
     int _spawnedCount;
     int _killedCount;
@@ -59,7 +59,7 @@ public class WaveManager : MonoBehaviour
 
         int intervals = Mathf.FloorToInt(_elapsedTime / GameConstants.SPAWN_RATE_INCREASE_INTERVAL);
         _currentSpawnInterval = Mathf.Max(minSpawnInterval,
-            baseSpawnInterval - intervals * 0.2f);
+            baseSpawnInterval - intervals * 0.25f);
 
         _spawnTimer -= Time.deltaTime;
         if (_spawnTimer <= 0f)
@@ -170,6 +170,10 @@ public class WaveManager : MonoBehaviour
                 y = Random.Range(camPos.y - camHeight - margin, camPos.y + camHeight + margin);
                 break;
         }
+
+        float half = GameConstants.ARENA_HALF_SIZE;
+        x = Mathf.Clamp(x, -half, half);
+        y = Mathf.Clamp(y, -half, half);
 
         return new Vector3(x, y, 0f);
     }

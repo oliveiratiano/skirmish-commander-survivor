@@ -91,9 +91,9 @@ public static class ProjectSetup
             unitName = "Swarm Bug",
             color = new Color(0.7f, 0.2f, 0.1f),
             cost = 0,
-            maxHP = 15f,
-            moveSpeed = 3.5f,
-            damage = 5f,
+            maxHP = 20f,
+            moveSpeed = 4f,
+            damage = 7f,
             range = 3f,
             accuracySpread = 15f,
             cooldown = 1.2f,
@@ -159,15 +159,18 @@ public static class ProjectSetup
         GameObject waveGO = CreateEmpty("WaveManager");
         var wm = waveGO.AddComponent<WaveManager>();
         wm.enemyData = swarmBug;
-        wm.totalEnemies = 60;
-        wm.baseSpawnInterval = 2f;
-        wm.minSpawnInterval = 0.3f;
+        wm.totalEnemies = 100;
+        wm.baseSpawnInterval = 1.5f;
+        wm.minSpawnInterval = 0.2f;
 
         GameObject flowGO = CreateEmpty("GameFlowManager");
         flowGO.AddComponent<GameFlowManager>();
 
         GameObject arenaGO = CreateEmpty("ArenaSetup");
         arenaGO.AddComponent<ArenaSetup>();
+
+        GameObject boundaryGO = CreateEmpty("ArenaBoundary");
+        boundaryGO.AddComponent<ArenaBoundary>();
 
         // UI root
         GameObject uiRoot = CreateEmpty("--- UI ---");
