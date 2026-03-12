@@ -5,7 +5,7 @@ A real-time wave survival / auto-battler hybrid. Control a vulnerable Commander,
 ## Quick Start
 
 ### Prerequisites
-- Unity 2022.3 LTS (or latest LTS)
+- Unity 6 (6000.3.11f1)
 - Git
 
 ### Open the Project
