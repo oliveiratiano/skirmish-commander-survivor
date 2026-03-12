@@ -26,13 +26,20 @@ public class InputHandler : MonoBehaviour
         MoveInput = new Vector2(h, v).normalized;
 
         if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
             OnCommandStateChanged?.Invoke(CommandState.Engage);
+        }
         if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
             OnCommandStateChanged?.Invoke(CommandState.Follow);
+        }
         if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
             OnCommandStateChanged?.Invoke(CommandState.Retreat);
+        }
 
         if (Input.GetKeyDown(KeyCode.F3))
             OnDebugToggle?.Invoke();
     }
+
 }

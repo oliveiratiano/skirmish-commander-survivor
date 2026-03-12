@@ -16,12 +16,11 @@ public class UnitSpawner : MonoBehaviour
         var move = go.AddComponent<MovementComponent>();
         move.moveSpeed = data.moveSpeed;
         go.AddComponent<HealthComponent>();
-        var ai = go.AddComponent<UnitAIController>();
-        ai.Initialize(data, isPlayer: true);
-
         var attack = go.AddComponent<RangedAttackComponent>();
         attack.data = data;
         attack.isPlayerUnit = true;
+        var ai = go.AddComponent<UnitAIController>();
+        ai.Initialize(data, isPlayer: true);
 
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();

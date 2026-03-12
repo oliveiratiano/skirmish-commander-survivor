@@ -25,7 +25,6 @@ public class UnitAIController : MonoBehaviour
     bool _movementLocked;
     CommandState _lastPlayerState = CommandState.Follow;
     bool _hasLastPlayerState;
-
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
     public static readonly System.Collections.Generic.List<UnitAIController> AllEnemyUnits
@@ -60,6 +59,8 @@ public class UnitAIController : MonoBehaviour
 
     void Update()
     {
+        EnsureAttackReference();
+
         if (_health != null && _health.IsDead) return;
 
         if (IsPlayerUnit)
@@ -69,6 +70,12 @@ public class UnitAIController : MonoBehaviour
 
         if (!_movementLocked)
             ApplyFriendlyAvoidance();
+    }
+
+    void EnsureAttackReference()
+    {
+        if (_attack == null)
+            _attack = GetComponent<RangedAttackComponent>();
     }
 
     void UpdatePlayerUnit()

@@ -69,7 +69,7 @@ public class RangedAttackComponent : MonoBehaviour
         if (target == null) return;
 
         Vector3 toTarget = (target.position - transform.position).normalized;
-        float deviation = Random.Range(-data.accuracySpreadDegrees, data.accuracySpreadDegrees);
+        float deviation = UnityEngine.Random.Range(-data.accuracySpreadDegrees, data.accuracySpreadDegrees);
         Vector3 direction = Quaternion.Euler(0f, 0f, deviation) * toTarget;
 
         SpawnProjectile(direction);

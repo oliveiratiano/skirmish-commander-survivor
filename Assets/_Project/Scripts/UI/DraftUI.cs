@@ -100,7 +100,7 @@ public class DraftUI : MonoBehaviour
         }
 
         // Pass remaining budget to reinforcement UI
-        var reinforcement = FindObjectOfType<ReinforcementUI>();
+        var reinforcement = FindFirstObjectByType<ReinforcementUI>();
         if (reinforcement != null)
             reinforcement.SetBudget(_remainingBudget);
 
