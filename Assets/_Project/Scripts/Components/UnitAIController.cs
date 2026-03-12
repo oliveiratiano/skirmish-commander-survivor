@@ -11,10 +11,20 @@ public class UnitAIController : MonoBehaviour
     HealthComponent _health;
     RangedAttackComponent _attack;
 
+    enum ShootPrepPhase
+    {
+        OutOfRange,
+        Preparing,
+        ReadyToFire
+    }
+
     float _shootPrepTimer;
-    bool _isPreparingToShoot;
-    bool _prepComplete;
     const float SHOOT_PREP_DURATION = 0.5f;
+    ShootPrepPhase _shootPrepPhase = ShootPrepPhase.OutOfRange;
+
+    bool _movementLocked;
+    CommandState _lastPlayerState = CommandState.Follow;
+    bool _hasLastPlayerState;
 
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
@@ -57,7 +67,8 @@ public class UnitAIController : MonoBehaviour
         else
             UpdateEnemyUnit();
 
-        ApplyFriendlyAvoidance();
+        if (!_movementLocked)
+            ApplyFriendlyAvoidance();
     }
 
     void UpdatePlayerUnit()
@@ -66,16 +77,32 @@ public class UnitAIController : MonoBehaviour
             ? CommandSystem.Instance.CurrentState
             : CommandState.Follow;
 
-        bool canAttack = state != CommandState.Retreat;
-        if (_attack != null)
-            _attack.enabled = canAttack;
+        if (!_hasLastPlayerState)
+        {
+            _lastPlayerState = state;
+            _hasLastPlayerState = true;
+        }
+
+        if (_lastPlayerState != state)
+        {
+            if (state == CommandState.Retreat)
+                EnterRetreatMode();
+            else if (_lastPlayerState == CommandState.Retreat)
+                ExitRetreatMode();
+        }
+
+        _lastPlayerState = state;
 
         switch (state)
         {
             case CommandState.Engage:
+                if (_attack != null)
+                    _attack.enabled = true;
                 HandleEngage();
                 break;
             case CommandState.Follow:
+                if (_attack != null)
+                    _attack.enabled = true;
                 HandleFollow();
                 break;
             case CommandState.Retreat:
@@ -89,7 +116,8 @@ public class UnitAIController : MonoBehaviour
         Transform nearest = FindNearest(AllEnemyUnits);
         if (nearest == null)
         {
-            ResetPrep();
+            ClearShootPrepState();
+            _movementLocked = false;
             _movement.Stop();
             return;
         }
@@ -97,12 +125,14 @@ public class UnitAIController : MonoBehaviour
         float dist = (nearest.position - transform.position).magnitude;
         if (data != null && dist <= data.range)
         {
+            _movementLocked = true;
             _movement.Stop();
-            RunShootPrep();
+            UpdateShootPrepInRange();
         }
         else
         {
-            ResetPrep();
+            ClearShootPrepState();
+            _movementLocked = false;
             Vector3 dir = (nearest.position - transform.position).normalized;
             _movement.Move(dir);
         }
@@ -110,7 +140,13 @@ public class UnitAIController : MonoBehaviour
 
     void HandleFollow()
     {
-        if (CommanderController.Instance == null) return;
+        if (CommanderController.Instance == null)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            _movement.Stop();
+            return;
+        }
 
         bool enemyInRange = false;
         if (_attack != null && data != null)
@@ -125,33 +161,38 @@ public class UnitAIController : MonoBehaviour
 
         if (enemyInRange)
         {
+            _movementLocked = true;
             _movement.Stop();
-            RunShootPrep();
-
-            if (_prepComplete && _attack != null && !_attack.IsShooting)
-                ResetPrep();
+            UpdateShootPrepInRange();
         }
         else
         {
-            ResetPrep();
+            ClearShootPrepState();
+            _movementLocked = false;
             MoveTowardCommander(0.85f);
         }
     }
 
     void HandleRetreat()
     {
-        ResetPrep();
         if (_attack != null)
-            _attack.CanFire = false;
+            _attack.enabled = false;
+
+        ClearShootPrepState();
+        _movementLocked = false;
         MoveTowardCommander(1f);
     }
 
     void UpdateEnemyUnit()
     {
+        if (_attack != null)
+            _attack.enabled = true;
+
         Transform nearest = FindNearestAnyUnit();
         if (nearest == null)
         {
-            ResetPrep();
+            ClearShootPrepState();
+            _movementLocked = false;
             _movement.Stop();
             return;
         }
@@ -159,44 +200,77 @@ public class UnitAIController : MonoBehaviour
         float dist = (nearest.position - transform.position).magnitude;
         if (data != null && dist <= data.range)
         {
+            _movementLocked = true;
             _movement.Stop();
-            RunShootPrep();
+            UpdateShootPrepInRange();
         }
         else
         {
-            ResetPrep();
+            ClearShootPrepState();
+            _movementLocked = false;
             Vector3 dir = (nearest.position - transform.position).normalized;
             _movement.Move(dir);
         }
     }
 
-    void RunShootPrep()
+    void UpdateShootPrepInRange()
     {
         if (_attack == null) return;
 
-        if (!_isPreparingToShoot)
+        if (_shootPrepPhase == ShootPrepPhase.OutOfRange)
         {
-            _isPreparingToShoot = true;
-            _prepComplete = false;
+            _shootPrepPhase = ShootPrepPhase.Preparing;
             _shootPrepTimer = SHOOT_PREP_DURATION;
             _attack.CanFire = false;
         }
 
-        _shootPrepTimer -= Time.deltaTime;
-
-        if (_shootPrepTimer <= 0f && !_prepComplete)
+        if (_shootPrepPhase == ShootPrepPhase.Preparing)
         {
-            _prepComplete = true;
-            _attack.CanFire = true;
+            _shootPrepTimer -= Time.deltaTime;
+
+            if (_shootPrepTimer <= 0f)
+            {
+                _shootPrepPhase = ShootPrepPhase.ReadyToFire;
+                _attack.CanFire = true;
+            }
+            else
+            {
+                _attack.CanFire = false;
+            }
+            return;
         }
+
+        if (_shootPrepPhase == ShootPrepPhase.ReadyToFire)
+            _attack.CanFire = true;
     }
 
-    void ResetPrep()
+    void ClearShootPrepState()
     {
-        _isPreparingToShoot = false;
-        _prepComplete = false;
+        _shootPrepPhase = ShootPrepPhase.OutOfRange;
+        _shootPrepTimer = 0f;
         if (_attack != null)
             _attack.CanFire = false;
+    }
+
+    void EnterRetreatMode()
+    {
+        if (_attack != null)
+        {
+            _attack.enabled = false;
+            _attack.CanFire = false;
+        }
+        ClearShootPrepState();
+        _movementLocked = false;
+    }
+
+    void ExitRetreatMode()
+    {
+        if (_attack != null)
+        {
+            _attack.enabled = true;
+            _attack.CanFire = false;
+        }
+        ClearShootPrepState();
     }
 
     void MoveTowardCommander(float urgency)
