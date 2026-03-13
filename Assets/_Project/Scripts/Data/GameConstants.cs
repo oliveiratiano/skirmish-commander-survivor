@@ -45,8 +45,8 @@ public static class GameConstants
 
     // Commander sprite sheet: scale so 256px @ 64 PPU fits ~1 unit; animation cycle speed
     public const float COMMANDER_SPRITE_SCALE = 0.56f; // ~50% larger again (was 0.375)
-    public const float UNIT_SPRITE_SCALE = 0.2f;
-    public const float ENEMY_SPRITE_SCALE = 0.175f;
+    public const float UNIT_SPRITE_SCALE = 0.3f;   // +50% (was 0.2f)
+    public const float ENEMY_SPRITE_SCALE = 0.2625f; // +50% (was 0.175f)
     public const float SPRITE_SHEET_FRAMES_PER_SECOND = 10f;
     public const float SHOOT_ANIM_DURATION = 0.2f;
 
