@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   unitName: Sharpshooter
   unitColor: {r: 0.8, g: 0.2, b: 0.9, a: 1}
-  sprites: []
+  spritesUp: []
+  spritesRight: []
+  spritesDown: []
   cost: 20
   maxHP: 10
   moveSpeed: 4

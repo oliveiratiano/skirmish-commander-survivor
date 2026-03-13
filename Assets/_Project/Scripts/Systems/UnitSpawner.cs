@@ -12,10 +12,9 @@ public class UnitSpawner : MonoBehaviour
 
     public GameObject SpawnPlayerUnit(UnitData data, Vector3 position)
     {
-        if (data.sprites != null && data.sprites.Length > 0)
-        {
+        bool hasSprites = (data.spritesUp != null && data.spritesUp.Length > 0) || (data.spritesRight != null && data.spritesRight.Length > 0) || (data.spritesDown != null && data.spritesDown.Length > 0);
+        if (hasSprites)
             return SpawnPlayerUnitWithSprites(data, position);
-        }
 
         GameObject go = GameManager.CreatePrimitive(data.unitName, position, data.unitColor, 0.8f);
         var move = go.AddComponent<MovementComponent>();
@@ -45,7 +44,9 @@ public class UnitSpawner : MonoBehaviour
         go.transform.localScale = Vector3.one * GameConstants.UNIT_SPRITE_SCALE;
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = data.sprites[0];
+        Sprite[] first = data.spritesDown ?? data.spritesUp ?? data.spritesRight;
+        int idleIdx = GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX;
+        sr.sprite = first != null && first.Length > idleIdx ? first[idleIdx] : (first != null && first.Length > 0 ? first[0] : null);
         sr.material = new Material(Shader.Find("Sprites/Default"));
         sr.material.color = Color.white;
 
@@ -61,7 +62,7 @@ public class UnitSpawner : MonoBehaviour
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
         var anim = go.AddComponent<SpriteSheetAnimator>();
-        anim.SetSprites(data.sprites);
+        anim.SetDirectionalSprites(data.spritesUp, data.spritesRight, data.spritesDown);
         go.AddComponent<IsometricSorting>();
         go.AddComponent<CommandFeedbackDisplay>();
 

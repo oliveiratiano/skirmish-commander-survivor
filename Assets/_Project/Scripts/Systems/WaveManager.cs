@@ -182,10 +182,9 @@ public class WaveManager : MonoBehaviour
     {
         if (_enemyPrefab != null) return;
 
-        if (enemyData.sprites != null && enemyData.sprites.Length > 0)
-        {
+        bool hasSprites = (enemyData.spritesUp != null && enemyData.spritesUp.Length > 0) || (enemyData.spritesRight != null && enemyData.spritesRight.Length > 0) || (enemyData.spritesDown != null && enemyData.spritesDown.Length > 0);
+        if (hasSprites)
             _enemyPrefab = CreateEnemyPrefabWithSprites();
-        }
         else
         {
             _enemyPrefab = GameManager.CreatePrimitive("EnemyPrefab", Vector3.zero, enemyData.unitColor, 0.7f);
@@ -214,7 +213,9 @@ public class WaveManager : MonoBehaviour
         go.transform.localScale = Vector3.one * GameConstants.ENEMY_SPRITE_SCALE;
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = enemyData.sprites[0];
+        Sprite[] first = enemyData.spritesDown ?? enemyData.spritesUp ?? enemyData.spritesRight;
+        int idleIdx = GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX;
+        sr.sprite = first != null && first.Length > idleIdx ? first[idleIdx] : (first != null && first.Length > 0 ? first[0] : null);
         sr.material = new Material(Shader.Find("Sprites/Default"));
         sr.material.color = Color.white;
 
@@ -228,7 +229,7 @@ public class WaveManager : MonoBehaviour
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
         var anim = go.AddComponent<SpriteSheetAnimator>();
-        anim.SetSprites(enemyData.sprites);
+        anim.SetDirectionalSprites(enemyData.spritesUp, enemyData.spritesRight, enemyData.spritesDown);
         go.AddComponent<IsometricSorting>();
 
         return go;

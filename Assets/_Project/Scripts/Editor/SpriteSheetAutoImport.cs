@@ -3,7 +3,7 @@ using UnityEditor;
 
 /// <summary>
 /// Automatically configures sprite sheets under Assets/_Project/Art/ (Commander, unit subfolders).
-/// Uses GameConstants for grid and dimensions. Only applies 6x2 slice when texture is exactly SPRITE_SHEET_WIDTH x SPRITE_SHEET_HEIGHT.
+/// Uses GameConstants for grid and dimensions (5x5, 1280x1280). Applies slice when texture matches.
 /// </summary>
 public class SpriteSheetAutoImport : AssetPostprocessor
 {
@@ -67,9 +67,9 @@ public class SpriteSheetAutoImport : AssetPostprocessor
         SetSpriteSheetViaSerializedObject(importer, sheet);
     }
 
-    /// <summary>Force 6x2 (12) slice on the selected texture and reimport. Use when auto-import gave fewer than 12 sprites.</summary>
-    [MenuItem("Commander Survival/Slice Selected Texture 6x2 (12 sprites)", true)]
-    static bool ValidateSliceSelectedTexture6x2()
+    /// <summary>Force 5x5 (25) slice on the selected texture and reimport. Texture must be 1280x1280.</summary>
+    [MenuItem("Commander Survival/Slice Selected Texture 5x5 (25 sprites)", true)]
+    static bool ValidateSliceSelectedTexture5x5()
     {
         var o = Selection.activeObject;
         if (o == null) return false;
@@ -77,18 +77,18 @@ public class SpriteSheetAutoImport : AssetPostprocessor
         return !string.IsNullOrEmpty(path) && path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase);
     }
 
-    [MenuItem("Commander Survival/Slice Selected Texture 6x2 (12 sprites)", false, 25)]
-    static void SliceSelectedTexture6x2()
+    [MenuItem("Commander Survival/Slice Selected Texture 5x5 (25 sprites)", false, 25)]
+    static void SliceSelectedTexture5x5()
     {
         string path = AssetDatabase.GetAssetPath(Selection.activeObject);
         if (string.IsNullOrEmpty(path) || !path.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
             return;
-        bool ok = Apply6x2SliceAndReimport(path);
-        EditorUtility.DisplayDialog("Slice Texture", ok ? "Applied 6x2 (12) slices. Run \"Fill Commander Sprites From Image\" again to load all 12." : "Could not apply 12 slices. Check Console for errors.", "OK");
+        bool ok = ApplyGridSliceAndReimport(path);
+        EditorUtility.DisplayDialog("Slice Texture", ok ? "Applied 5x5 (25) slices. Use Fill Commander Sprites / Load Sprites for each direction." : "Could not apply 25 slices. Texture must be 1280x1280. Check Console.", "OK");
     }
 
-    /// <summary>Apply 6x2 grid (12 slices) to the texture at assetPath and reimport. Returns true only if texture is exactly SPRITE_SHEET_WIDTH x SPRITE_SHEET_HEIGHT.</summary>
-    public static bool Apply6x2SliceAndReimport(string assetPath)
+    /// <summary>Apply grid from GameConstants (5x5, 1280x1280) and reimport. Returns true only if texture matches.</summary>
+    public static bool ApplyGridSliceAndReimport(string assetPath)
     {
         var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
         if (importer == null)
@@ -105,7 +105,7 @@ public class SpriteSheetAutoImport : AssetPostprocessor
             if (tex != null) { width = tex.width; height = tex.height; }
             else
             {
-                Debug.LogError($"[SpriteSheetAutoImport] Could not read dimensions. Texture must be exactly {GameConstants.SPRITE_SHEET_WIDTH}x{GameConstants.SPRITE_SHEET_HEIGHT}. See SPEC and GameConstants.");
+                Debug.LogError($"[SpriteSheetAutoImport] Could not read dimensions. Texture must be exactly {GameConstants.SPRITE_SHEET_WIDTH}x{GameConstants.SPRITE_SHEET_HEIGHT} (5x5 grid). See SPEC and GameConstants.");
                 return false;
             }
         }

@@ -6,7 +6,7 @@ using System.Linq;
 /// <summary>Shared helper to load sprites from the single texture the user selected. Used by UnitData editor, GameManager editor, and menu.</summary>
 public static class UnitDataSpriteLoader
 {
-    /// <summary>Load sprites only from the selected image file (one texture, sliced into 12 or N parts). Returns (sprites, null) on success, or (null, errorMessage) on failure.</summary>
+    /// <summary>Load sprites from the selected image file (one texture, 5x5 = 25 parts for 1280x1280). Returns (sprites, null) on success, or (null, errorMessage) on failure.</summary>
     public static (List<Sprite> sprites, string error) LoadSpritesFromSelectedFile(string absoluteFilePath)
     {
         string assetPath = FileUtil.GetProjectRelativePath(absoluteFilePath);
@@ -32,9 +32,10 @@ public static class UnitDataSpriteLoader
 
         Debug.Log($"[UnitDataSpriteLoader] Loading from asset: {assetPath} -> {allSprites.Count} sprite(s): [{string.Join(", ", allSprites.Select(x => x.name))}]");
 
-        if (allSprites.Count < 12)
+        const int expectedCount = 25;
+        if (allSprites.Count < expectedCount)
         {
-            if (SpriteSheetAutoImport.Apply6x2SliceAndReimport(assetPath))
+            if (SpriteSheetAutoImport.ApplyGridSliceAndReimport(assetPath))
             {
                 assets = AssetDatabase.LoadAllAssetsAtPath(assetPath);
                 allSprites.Clear();
@@ -43,12 +44,12 @@ public static class UnitDataSpriteLoader
                     if (obj is Sprite s)
                         allSprites.Add(s);
                 }
-                Debug.Log($"[UnitDataSpriteLoader] After auto 6x2 slice: {assetPath} -> {allSprites.Count} sprite(s): [{string.Join(", ", allSprites.Select(x => x.name))}]");
+                Debug.Log($"[UnitDataSpriteLoader] After auto 5x5 slice: {assetPath} -> {allSprites.Count} sprite(s)");
             }
         }
 
         if (allSprites.Count == 0)
-            return (null, "No sprite sub-assets. Texture must be exactly 1536×614 px so it can be auto-sliced. Resize the PNG and try again, or use menu: Commander Survival > Slice Selected Texture 6x2 (12 sprites) on the texture first.");
+            return (null, "No sprite sub-assets. Texture must be exactly 1280×1280 px for 5×5 (25) slice. Use menu: Commander Survival > Slice Selected Texture 5x5 (25 sprites), then try again.");
 
         allSprites = SortSpritesByNumericSuffix(allSprites);
         return (allSprites, null);
@@ -82,10 +83,11 @@ public static class UnitDataSpriteLoader
         return int.TryParse(suffix, out n) ? n : -1;
     }
 
-    public static void ApplySpritesToUnitData(UnitData unitData, List<Sprite> allSprites)
+    public static void ApplySpritesToUnitDataDirection(UnitData unitData, List<Sprite> allSprites, string direction)
     {
+        string propName = direction == "Up" ? "spritesUp" : direction == "Right" ? "spritesRight" : "spritesDown";
         var so = new SerializedObject(unitData);
-        var spritesProp = so.FindProperty("sprites");
+        var spritesProp = so.FindProperty(propName);
         if (spritesProp != null)
         {
             so.Update();
@@ -97,7 +99,10 @@ public static class UnitDataSpriteLoader
         }
         else
         {
-            unitData.sprites = allSprites.ToArray();
+            var arr = allSprites.ToArray();
+            if (direction == "Up") unitData.spritesUp = arr;
+            else if (direction == "Right") unitData.spritesRight = arr;
+            else unitData.spritesDown = arr;
         }
         EditorUtility.SetDirty(unitData);
         AssetDatabase.SaveAssets();
@@ -118,12 +123,7 @@ public static class UnitDataSpriteLoader
 [CustomEditor(typeof(UnitData))]
 public class UnitDataEditor : Editor
 {
-    SerializedProperty _spritesProp;
-
-    void OnEnable()
-    {
-        _spritesProp = serializedObject.FindProperty("sprites");
-    }
+    void OnEnable() { }
 
     public override void OnInspectorGUI()
     {
@@ -131,83 +131,63 @@ public class UnitDataEditor : Editor
 
         var unitData = (UnitData)target;
         EditorGUILayout.Space(4);
-        EditorGUILayout.HelpBox("Select the sprite sheet PNG for this unit. Texture must be exactly 1536×614 px (6×2 grid, 12 frames). See GameConstants and SPEC.", MessageType.None);
-        if (GUILayout.Button("Load Sprites From Image..."))
-        {
-            string startPath = System.IO.Path.Combine(Application.dataPath, "_Project", "Art");
-            if (!System.IO.Directory.Exists(startPath))
-                startPath = Application.dataPath;
-            string selectedFile = EditorUtility.OpenFilePanel("Select sprite sheet (PNG, exactly 1536×614 px, 6×2 grid)", startPath, "png");
-            if (string.IsNullOrEmpty(selectedFile)) return;
-
-            try
-            {
-                var (sprites, error) = UnitDataSpriteLoader.LoadSpritesFromSelectedFile(selectedFile);
-                if (error != null)
-                {
-                    EditorUtility.DisplayDialog("Load Sprites", error, "OK");
-                    return;
-                }
-                if (_spritesProp != null)
-                {
-                    UnitDataSpriteLoader.ApplySpritesToSerializedProperty(_spritesProp, sprites, serializedObject);
-                }
-                else
-                {
-                    UnitDataSpriteLoader.ApplySpritesToUnitData(unitData, sprites);
-                }
-                EditorUtility.SetDirty(unitData);
-                AssetDatabase.SaveAssets();
-                Repaint();
-                string msg = "Loaded " + sprites.Count + " sprites into " + unitData.name + ".\n\nOrder: by name (idle 0-2, walk 3-8, shoot 9-10).";
-                if (sprites.Count < 12)
-                    msg += "\n\nOnly " + sprites.Count + " sprites were found. For full animation you need 12. Put the PNG in Assets/_Project/Art (e.g. Art/Sprites or Art/Commander) and reimport for auto 6x2 slice, then run this again.";
-                EditorUtility.DisplayDialog("Load Sprites", msg, "OK");
-            }
-            catch (System.Exception ex)
-            {
-                EditorUtility.DisplayDialog("Load Sprites", "Error: " + ex.Message, "OK");
-                Debug.LogException(ex);
-            }
-        }
-    }
-
-    [MenuItem("Commander Survival/Fill Sprites From Image", true)]
-    static bool ValidateFillSpritesFromImage()
-    {
-        return Selection.activeObject is UnitData;
-    }
-
-    [MenuItem("Commander Survival/Fill Sprites From Image", false, 20)]
-    static void FillSpritesFromImage()
-    {
-        var unitData = Selection.activeObject as UnitData;
-        if (unitData == null) return;
-
+        EditorGUILayout.HelpBox("Three directional sprite sheets (1280×1280, 5×5 = 25 frames each). Idle = center frame (index 12). Load Up, Right, and Down.", MessageType.None);
         string startPath = System.IO.Path.Combine(Application.dataPath, "_Project", "Art");
         if (!System.IO.Directory.Exists(startPath))
             startPath = Application.dataPath;
-        string selectedFile = EditorUtility.OpenFilePanel("Select sprite sheet (PNG, exactly 1536×614 px, 6×2 grid)", startPath, "png");
-        if (string.IsNullOrEmpty(selectedFile)) return;
 
+        if (GUILayout.Button("Load Sprites (Up)..."))
+            LoadAndApplyDirection(unitData, startPath, "Up");
+        if (GUILayout.Button("Load Sprites (Right)..."))
+            LoadAndApplyDirection(unitData, startPath, "Right");
+        if (GUILayout.Button("Load Sprites (Down)..."))
+            LoadAndApplyDirection(unitData, startPath, "Down");
+    }
+
+    void LoadAndApplyDirection(UnitData unitData, string startPath, string direction)
+    {
+        string selectedFile = EditorUtility.OpenFilePanel("Select sprite sheet " + direction + " (PNG, 1280×1280, 5×5)", startPath, "png");
+        if (string.IsNullOrEmpty(selectedFile)) return;
         try
         {
             var (sprites, error) = UnitDataSpriteLoader.LoadSpritesFromSelectedFile(selectedFile);
-            if (error != null)
-            {
-                EditorUtility.DisplayDialog("Load Sprites", error, "OK");
-                return;
-            }
-            UnitDataSpriteLoader.ApplySpritesToUnitData(unitData, sprites);
-            string msg = "Loaded " + sprites.Count + " sprites into " + unitData.name + ".";
-            if (sprites.Count < 12)
-                msg += "\n\nFor full animation you need 12. Put the PNG in Assets/_Project/Art (e.g. Art/Sprites or Art/Commander) and reimport for auto 6x2 slice.";
-            EditorUtility.DisplayDialog("Load Sprites", msg, "OK");
+            if (error != null) { EditorUtility.DisplayDialog("Load Sprites", error, "OK"); return; }
+            UnitDataSpriteLoader.ApplySpritesToUnitDataDirection(unitData, sprites, direction);
+            EditorUtility.SetDirty(unitData);
+            AssetDatabase.SaveAssets();
+            Repaint();
+            EditorUtility.DisplayDialog("Load Sprites", "Loaded " + sprites.Count + " sprites into " + direction + ".", "OK");
         }
-        catch (System.Exception ex)
+        catch (System.Exception ex) { EditorUtility.DisplayDialog("Load Sprites", "Error: " + ex.Message, "OK"); Debug.LogException(ex); }
+    }
+
+    [MenuItem("Commander Survival/Fill Sprites From Image (Up)", true)]
+    [MenuItem("Commander Survival/Fill Sprites From Image (Right)", true)]
+    [MenuItem("Commander Survival/Fill Sprites From Image (Down)", true)]
+    static bool ValidateFillSpritesFromImage() => Selection.activeObject is UnitData;
+
+    [MenuItem("Commander Survival/Fill Sprites From Image (Up)", false, 20)]
+    static void FillSpritesUp() { FillSpritesDirection("Up"); }
+    [MenuItem("Commander Survival/Fill Sprites From Image (Right)", false, 21)]
+    static void FillSpritesRight() { FillSpritesDirection("Right"); }
+    [MenuItem("Commander Survival/Fill Sprites From Image (Down)", false, 22)]
+    static void FillSpritesDown() { FillSpritesDirection("Down"); }
+
+    static void FillSpritesDirection(string direction)
+    {
+        var unitData = Selection.activeObject as UnitData;
+        if (unitData == null) return;
+        string startPath = System.IO.Path.Combine(Application.dataPath, "_Project", "Art");
+        if (!System.IO.Directory.Exists(startPath)) startPath = Application.dataPath;
+        string selectedFile = EditorUtility.OpenFilePanel("Select sprite sheet " + direction + " (PNG, 1280×1280)", startPath, "png");
+        if (string.IsNullOrEmpty(selectedFile)) return;
+        try
         {
-            EditorUtility.DisplayDialog("Load Sprites", "Error: " + ex.Message, "OK");
-            Debug.LogException(ex);
+            var (sprites, error) = UnitDataSpriteLoader.LoadSpritesFromSelectedFile(selectedFile);
+            if (error != null) { EditorUtility.DisplayDialog("Load Sprites", error, "OK"); return; }
+            UnitDataSpriteLoader.ApplySpritesToUnitDataDirection(unitData, sprites, direction);
+            EditorUtility.DisplayDialog("Load Sprites", "Loaded " + sprites.Count + " into " + direction + ".", "OK");
         }
+        catch (System.Exception ex) { EditorUtility.DisplayDialog("Load Sprites", "Error: " + ex.Message, "OK"); }
     }
 }

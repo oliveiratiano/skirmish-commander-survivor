@@ -1,84 +1,75 @@
 using UnityEngine;
 
 /// <summary>
-/// Drives which sprite is shown from a 12-frame sheet (idle 0-2, walk 3-8, shoot 9-10) based on movement and shooting state.
-/// Keeps sprite facing the camera (isometric tilt only) and flips scale.x for left/right so it never goes edge-on and vanishes.
+/// Directional 25-frame sprite animator. Three sheets (up, right, down); right flipped for left.
+/// Idle = single center frame (index 12). Walk = all 25 frames. No shoot frames from sheet.
 /// </summary>
 public class SpriteSheetAnimator : MonoBehaviour
 {
-    const int IDLE_START = 0;
-    const int IDLE_COUNT = 3;
-    const int WALK_START = 3;
-    const int WALK_COUNT = 6;
-    const int SHOOT_START = 9;
-    const int SHOOT_COUNT = 2;
+    const int WALK_FRAME_COUNT = 25;
+    const int IDLE_FRAME_INDEX = 12; // center of 5x5 (row 3, col 3)
 
     SpriteRenderer _spriteRenderer;
     MovementComponent _movement;
-    RangedAttackComponent _attack;
     CommanderController _commander;
-    Sprite[] _sprites;
-    float _shootAnimTimer = -1f;
+    Sprite[] _spritesUp;
+    Sprite[] _spritesRight;
+    Sprite[] _spritesDown;
     Vector2 _lastFacing = new Vector2(0f, -1f);
 
     void Awake()
     {
         _spriteRenderer = GetComponent<SpriteRenderer>();
         _movement = GetComponent<MovementComponent>();
-        _attack = GetComponent<RangedAttackComponent>();
         _commander = GetComponent<CommanderController>();
     }
 
-    public void SetSprites(Sprite[] sprites)
+    public void SetDirectionalSprites(Sprite[] up, Sprite[] right, Sprite[] down)
     {
-        _sprites = sprites;
+        _spritesUp = up;
+        _spritesRight = right;
+        _spritesDown = down;
     }
 
     void Update()
     {
         if (_spriteRenderer == null) return;
 
-        // Rotation: only isometric tilt so sprite always faces camera (no Y rotation = no vanishing when moving A/D)
         transform.rotation = Quaternion.Euler(GameConstants.ISOMETRIC_CAMERA_ANGLE, 0f, 0f);
 
-        // Left/right: flip scale.x so sprite faces left/right without rotating (never edge-on / vanishing)
         Vector2 facing = GetFacing();
         if (facing.sqrMagnitude > 0.01f)
             _lastFacing = facing.normalized;
+
         float flip = _lastFacing.x >= 0f ? 1f : -1f;
         Vector3 s = transform.localScale;
         s.x = Mathf.Abs(s.x) * flip;
         transform.localScale = s;
 
-        if (_sprites == null || _sprites.Length == 0) return;
+        Sprite[] sheet = GetCurrentSheet();
+        if (sheet == null || sheet.Length == 0) return;
 
         bool isMoving = _movement != null && _movement.Velocity.sqrMagnitude > 0.01f;
-        bool isShooting = _attack != null && _attack.IsShooting;
+        int index = isMoving
+            ? Mathf.FloorToInt(Time.time * GameConstants.SPRITE_SHEET_FRAMES_PER_SECOND) % WALK_FRAME_COUNT
+            : GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX;
 
-        if (isShooting)
-            _shootAnimTimer = GameConstants.SHOOT_ANIM_DURATION;
+        index = Mathf.Clamp(index, 0, sheet.Length - 1);
+        if (sheet[index] != null)
+            _spriteRenderer.sprite = sheet[index];
+    }
 
-        int index;
-        if (_shootAnimTimer > 0f)
-        {
-            _shootAnimTimer -= Time.deltaTime;
-            float t = 1f - (_shootAnimTimer / GameConstants.SHOOT_ANIM_DURATION);
-            index = t < 0.5f ? SHOOT_START : SHOOT_START + 1;
-        }
-        else if (isMoving)
-        {
-            int frame = Mathf.FloorToInt(Time.time * GameConstants.SPRITE_SHEET_FRAMES_PER_SECOND) % WALK_COUNT;
-            index = WALK_START + frame;
-        }
-        else
-        {
-            int frame = Mathf.FloorToInt(Time.time * GameConstants.SPRITE_SHEET_FRAMES_PER_SECOND) % IDLE_COUNT;
-            index = IDLE_START + frame;
-        }
-
-        index = Mathf.Clamp(index, 0, _sprites.Length - 1);
-        if (_sprites[index] != null)
-            _spriteRenderer.sprite = _sprites[index];
+    Sprite[] GetCurrentSheet()
+    {
+        float x = _lastFacing.x;
+        float y = _lastFacing.y;
+        if (y > 0.01f && y >= Mathf.Abs(x))
+            return _spritesUp;
+        if (x > 0.01f)
+            return _spritesRight;
+        if (x < -0.01f)
+            return _spritesRight;
+        return _spritesDown;
     }
 
     Vector2 GetFacing()

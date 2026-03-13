@@ -9,9 +9,10 @@ public class GameManager : MonoBehaviour
     [Tooltip("Ordered: index 0 = key 1, 1 = key 2, 2 = key 3. Same as DraftUI available units.")]
     public UnitData[] playerUnitTypes;
 
-    [Header("Sprites (optional)")]
-    [Tooltip("12 sprites: Commander_0..11 (idle 0-2, walk 3-8, shoot 9-10). Leave empty to use colored quad.")]
-    public Sprite[] commanderSprites;
+    [Header("Sprites (optional) — 3 directional sheets, 25 frames each. Prefer Commander Data arrays when set.")]
+    public Sprite[] commanderSpritesUp;
+    public Sprite[] commanderSpritesRight;
+    public Sprite[] commanderSpritesDown;
 
     public GameObject CommanderObject { get; private set; }
 
@@ -25,12 +26,12 @@ public class GameManager : MonoBehaviour
     {
         if (CommanderObject != null) return;
 
-        Sprite[] sprites = (commanderData != null && commanderData.sprites != null && commanderData.sprites.Length > 0)
-            ? commanderData.sprites
-            : commanderSprites;
-        if (sprites != null && sprites.Length > 0)
+        Sprite[] up = commanderData != null && commanderData.spritesUp != null && commanderData.spritesUp.Length > 0 ? commanderData.spritesUp : commanderSpritesUp;
+        Sprite[] right = commanderData != null && commanderData.spritesRight != null && commanderData.spritesRight.Length > 0 ? commanderData.spritesRight : commanderSpritesRight;
+        Sprite[] down = commanderData != null && commanderData.spritesDown != null && commanderData.spritesDown.Length > 0 ? commanderData.spritesDown : commanderSpritesDown;
+        if ((up != null && up.Length > 0) || (right != null && right.Length > 0) || (down != null && down.Length > 0))
         {
-            SpawnCommanderWithSprites(sprites);
+            SpawnCommanderWithSprites(up, right, down);
             return;
         }
 
@@ -56,14 +57,15 @@ public class GameManager : MonoBehaviour
             cam.target = CommanderObject.transform;
     }
 
-    void SpawnCommanderWithSprites(Sprite[] sprites)
+    void SpawnCommanderWithSprites(Sprite[] up, Sprite[] right, Sprite[] down)
     {
         var go = new GameObject("Commander");
         go.transform.position = Vector3.zero;
         go.transform.localScale = Vector3.one * GameConstants.COMMANDER_SPRITE_SCALE;
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = sprites[0];
+        Sprite[] first = up != null && up.Length > 0 ? up : (right != null && right.Length > 0 ? right : down);
+        sr.sprite = first != null && first.Length > GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX ? first[GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX] : (first != null && first.Length > 0 ? first[0] : null);
         sr.material = new Material(Shader.Find("Sprites/Default"));
         sr.material.color = Color.white;
 
@@ -80,7 +82,7 @@ public class GameManager : MonoBehaviour
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
         var anim = go.AddComponent<SpriteSheetAnimator>();
-        anim.SetSprites(sprites);
+        anim.SetDirectionalSprites(up, right, down);
         go.AddComponent<IsometricSorting>();
         go.AddComponent<ShoutOvalDisplay>();
         go.AddComponent<CommandFeedbackDisplay>();

@@ -56,22 +56,18 @@ All combat is ranged. Accuracy uses **Aim Deviation** (rotating the perfect vect
 * **View:** Isometric. Camera is tilted so the scene is seen from above and behind; entity sprites face the camera.
 * **Aesthetic:** Grimdark Dystopian Sci-Fi.
 * **Sprite Art (Keyframe Animation):**
-  * Each entity type has a small set of **animation frames** (same isometric angle and pose style for all frames). Frames are played by state so the game reads as animated, not a single floating image.
-  * **Per-cell aspect:** width:height = 1:1.2 per frame (cell size **256×307 px**; see strict sheet dimensions below).
-  * **Format:** `.png` with transparency. One **sprite sheet** per entity; the runtime picks the correct frame by index.
-  * **Frame sets per entity (fixed for grid):** Idle **3** frames (indices 0–2) · Walk **6** frames (indices 3–8) · Shoot **2** frames (indices 9–10). Hit = procedural flash (no extra frame). Index **11** = unused/spare.
-  * **State logic:** Idle when not moving and not shooting; Walk when moving; Shoot triggers shoot frames then reverts. No directional variants (single facing; sprites always face the camera).
-* **Technical:** Animation is driven by game state (velocity, firing). Use Unity **Animator** + **Animation** clips (or a small script) to swap `SpriteRenderer.sprite` or advance sprite-sheet index by state. One controller per entity type (or shared with overridden clips).
-* **Procedural (optional):** Light code-driven effects may remain (e.g. hit flash tint, subtle scale on shoot) in addition to keyframe art.
+  * Each entity has **three directional sprite sheets** (up, right, down). Right sheet is flipped for left. Diagonal movement uses the last cardinal direction.
+  * **Per sheet:** **1280×1280 px** PNG, **5×5 grid** (25 cells of **256×256 px**). Source of truth: `GameConstants.SPRITE_SHEET_*`.
+  * **Idle:** Single frame at **center** of 5×5 (row 3, col 3 = index **12**). Sheet chosen by facing so idle pose matches direction.
+  * **Walk:** **All 25 frames** (0–24) form the walk cycle for that direction. No shoot frames from the sheet; shoot feedback is procedural only (e.g. hit flash, recoil).
+* **Technical:** `SpriteSheetAnimator` selects sheet from facing, shows frame 12 when idle and cycles 0–24 when moving. Pixels Per Unit: **64**.
+* **Procedural (optional):** Hit flash, recoil scale, etc. remain in addition to keyframe art.
 
-* **Asset placement and layout (streamlined — no manual slice editing):**
-  * **Location:** One PNG per entity in `Assets/_Project/Art/<EntityName>/`, e.g. `Commander/Commander.png`, `SwarmBug/SwarmBug.png`.
-  * **Strict dimensions (required for pipeline):** The sprite sheet PNG **must** be exactly **1536×614 pixels** (width × height). Cell size is **256×307 px** (6 columns × 2 rows). No other dimensions are supported; wrong sizes cause slice errors (e.g. rect outside texture). Source of truth in code: `GameConstants.SPRITE_SHEET_*`.
-  * **One sheet, fixed grid:** Each entity uses a **single sprite sheet** with this **fixed grid**. Unity slices by grid; the game uses **sprite index** (0–11). Left-to-right, top-to-bottom:
-    * **Row 0:** Idle (3) then Walk (3): indices **0, 1, 2** = idle · **3, 4, 5** = walk.
-    * **Row 1:** Walk (3) then Shoot (2) then spare: indices **6, 7, 8** = walk · **9, 10** = shoot · **11** = unused (or hit).
-  * **Unity:** Import the PNG → Texture Type = **Sprite (2D and UI)**, Sprite Mode = **Multiple**. Auto-import under `Assets/_Project/Art/` applies 6×2 slice; or use menu **Commander Survival → Slice Selected Texture 6x2 (12 sprites)**. Pixels Per Unit: **64**. Filter Mode as needed.
-  * **Summary:** One PNG per entity, **exactly 1536×614 px**, 6×2 grid (256×307 per cell). Game uses indices 0–2 idle, 3–8 walk, 9–10 shoot.
+* **Asset placement and layout:**
+  * **Location:** Three PNGs per entity in `Assets/_Project/Art/<EntityName>/`, e.g. `Commander_up.png`, `Commander_right.png`, `Commander_down.png`.
+  * **Strict dimensions:** Each PNG **must** be exactly **1280×1280 pixels**. Cell size **256×256 px** (5×5). Wrong sizes cause slice errors. Source of truth: `GameConstants.SPRITE_SHEET_*`.
+  * **Unity:** Auto-import under `Assets/_Project/Art/` applies 5×5 slice for 1280×1280; or use menu **Commander Survival → Slice Selected Texture 5x5 (25 sprites)**. Load each sheet via Inspector: **Load Sprites (Up)**, **(Right)**, **(Down)**.
+  * **Summary:** Three PNGs per entity, **exactly 1280×1280 px** each, 5×5 grid (256×256 per cell). Idle = frame 12; walk = all 25; no shoot frames from sheet.
 
 ## 8. QA, Playtesting & Architecture Tracking
 * **Debug Overlay:** MVP includes a UI toggle (Press F3) displaying: FPS, frame time, Active Command State, Active Player Units, Active Enemies, Pooled Projectiles, Pooled Enemies, Spawn Rate.

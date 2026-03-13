@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   unitName: Close-Quarters
   unitColor: {r: 0.1, g: 0.8, b: 0.3, a: 1}
-  sprites: []
+  spritesUp: []
+  spritesRight: []
+  spritesDown: []
   cost: 10
   maxHP: 30
   moveSpeed: 4.5

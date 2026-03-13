@@ -7,9 +7,13 @@ public class UnitData : ScriptableObject
     public string unitName;
     public Color unitColor = Color.white;
 
-    [Header("Sprites (optional)")]
-    [Tooltip("12 sprites: idle 0-2, walk 3-8, shoot 9-10. Same layout as Commander. Leave empty for colored quad.")]
-    public Sprite[] sprites;
+    [Header("Sprites (optional) — 3 directional sheets, 25 frames each (5×5). Idle = center frame (index 12).")]
+    [Tooltip("25 sprites: movement up. Leave empty for colored quad.")]
+    public Sprite[] spritesUp;
+    [Tooltip("25 sprites: movement right (flipped for left).")]
+    public Sprite[] spritesRight;
+    [Tooltip("25 sprites: movement down.")]
+    public Sprite[] spritesDown;
 
     [Header("Economy")]
     public int cost;

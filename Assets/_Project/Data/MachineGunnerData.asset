@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   unitName: Machine Gunner
   unitColor: {r: 0.9, g: 0.6, b: 0.1, a: 1}
-  sprites: []
+  spritesUp: []
+  spritesRight: []
+  spritesDown: []
   cost: 15
   maxHP: 20
   moveSpeed: 3.5

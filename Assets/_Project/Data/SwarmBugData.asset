@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   unitName: Swarm Bug
   unitColor: {r: 0.7, g: 0.2, b: 0.1, a: 1}
-  sprites: []
+  spritesUp: []
+  spritesRight: []
+  spritesDown: []
   cost: 0
   maxHP: 20
   moveSpeed: 4
