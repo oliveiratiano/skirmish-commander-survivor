@@ -58,13 +58,14 @@ public class ProceduralAnimator : MonoBehaviour
         }
 
         transform.localScale = scale;
-        transform.rotation = Quaternion.Euler(0f, 0f, rotation);
+        float isoAngle = GameConstants.ISOMETRIC_CAMERA_ANGLE;
+        transform.rotation = Quaternion.Euler(isoAngle, 0f, 0f) * Quaternion.Euler(0f, 0f, rotation);
     }
 
     public void ResetAnimation()
     {
         transform.localScale = _baseScale;
-        transform.rotation = Quaternion.identity;
+        transform.rotation = Quaternion.Euler(GameConstants.ISOMETRIC_CAMERA_ANGLE, 0f, 0f);
         _recoilTimer = 0f;
     }
 }

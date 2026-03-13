@@ -192,6 +192,7 @@ public class WaveManager : MonoBehaviour
         attack.isPlayerUnit = false;
         _enemyPrefab.AddComponent<HitFlashComponent>();
         _enemyPrefab.AddComponent<ProceduralAnimator>();
+        _enemyPrefab.AddComponent<IsometricSorting>();
         _enemyPrefab.SetActive(false);
 
         if (ObjectPool.Instance != null)

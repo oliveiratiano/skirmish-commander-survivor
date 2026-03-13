@@ -25,6 +25,14 @@ public static class GameConstants
     public const float COMMAND_FEEDBACK_DURATION = 1f;
     public const float COMMANDER_RADIUS = 2.5f;
 
+    // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.
+    public const float ISOMETRIC_CAMERA_ANGLE = 45f;
+    public const float ISOMETRIC_CAMERA_OFFSET_Y = 20f;
+    public const float ISOMETRIC_CAMERA_OFFSET_Z = -24f;
+    public const int ISOMETRIC_SORT_BASE_ORDER = 1000;
+    public const int ISOMETRIC_SORT_SCALE = 10;
+    public const int ISOMETRIC_SORT_PROJECTILE_ORDER = 10000;
+
     public static readonly Color ARENA_COLOR = new Color(0.184f, 0.176f, 0.165f); // #2F2D2A
     public static readonly Color DANGER_ZONE_COLOR = new Color(0.6f, 0.05f, 0.05f, 0.25f);
     public static readonly Color DANGER_EDGE_COLOR = new Color(0.9f, 0.1f, 0.1f, 0.8f);

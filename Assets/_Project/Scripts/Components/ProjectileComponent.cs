@@ -21,7 +21,10 @@ public class ProjectileComponent : MonoBehaviour
 
         Renderer r = GetComponent<Renderer>();
         if (r != null)
+        {
             r.material.color = color;
+            r.sortingOrder = GameConstants.ISOMETRIC_SORT_PROJECTILE_ORDER;
+        }
     }
 
     void Update()

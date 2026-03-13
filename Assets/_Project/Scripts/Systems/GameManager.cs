@@ -34,6 +34,7 @@ public class GameManager : MonoBehaviour
 
         CommanderObject.AddComponent<HitFlashComponent>();
         CommanderObject.AddComponent<ProceduralAnimator>();
+        CommanderObject.AddComponent<IsometricSorting>();
         CommanderObject.AddComponent<ShoutOvalDisplay>();
         CommanderObject.AddComponent<CommandFeedbackDisplay>();
 

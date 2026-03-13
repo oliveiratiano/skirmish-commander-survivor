@@ -21,14 +21,14 @@ public class CameraController : MonoBehaviour
         _cam.orthographicSize = baseSize;
         _targetSize = baseSize;
         _cam.backgroundColor = GameConstants.ARENA_COLOR;
+        transform.rotation = Quaternion.Euler(GameConstants.ISOMETRIC_CAMERA_ANGLE, 0f, 0f);
     }
 
     void LateUpdate()
     {
         if (target == null) return;
 
-        Vector3 desired = target.position;
-        desired.z = transform.position.z;
+        Vector3 desired = target.position + new Vector3(0f, GameConstants.ISOMETRIC_CAMERA_OFFSET_Y, GameConstants.ISOMETRIC_CAMERA_OFFSET_Z);
         transform.position = Vector3.Lerp(transform.position, desired, followSmoothing * Time.deltaTime);
 
         _cam.orthographicSize = Mathf.Lerp(_cam.orthographicSize, _targetSize, zoomSmoothing * Time.deltaTime);

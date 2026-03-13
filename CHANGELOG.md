@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - Editor menu setup script (Commander Survival > Full Setup) for one-click project initialization
 
 ### Changed
+- Isometric camera and visuals: camera tilted (30°) with fixed offset; entity quads tilted to face camera; Y-based depth sorting (IsometricSorting); projectiles draw on top; SPEC updated with isometric view and sprite ratio 1:1.2.
 - Command renames (Engage→Attack, Follow→Form Up, Retreat→Regroup); single `COMMANDER_RADIUS` constant; Regroup switches to Form Up when unit is within radius.
 - Visual command feedback: Commander shows command icon on issue; units show same icon 1s after receiving (placeholder colored quads per command) (Slice 7).
 - Shift+arrow enables relay: receiving units pass command to nearby allies of the same type after 0.5s hop delay; death breaks chain (Slice 5, same-type-only relay).

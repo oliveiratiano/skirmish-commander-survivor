@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 * **Genre:** Real-Time Wave Survival / Auto-Battler Hybrid.
-* **Camera:** Top-down orthographic view, locked to the Commander with slight dynamic zoom (zooms out as enemy density increases, zooms in when clear).
+* **Camera:** Isometric orthographic view (tilted angle), locked to the Commander with slight dynamic zoom (zooms out as enemy density increases, zooms in when clear).
 * **Core Loop:** Draft army (Pre-game) -> Enter Arena -> Move Commander & Issue State Commands -> Survive.
 * **Victory Conditions:**
   1. All pre-set enemies for the wave are spawned and killed before the timer expires (best score).
@@ -53,11 +53,12 @@ All combat is ranged. Accuracy uses **Aim Deviation** (rotating the perfect vect
 * **Architecture:** Use **Composition over Inheritance** (e.g., `HealthComponent`, `RangedAttackComponent`) and drive stats via ScriptableObjects (`UnitData`).
 
 ## 7. Design, Assets & Procedural Animation
-* **Asset Format:** Primitive shapes (colored quads) as MVP placeholders. Final art will use single static `.png` sprites per entity type. No sprite sheets.
+* **View:** Isometric. Camera is tilted (e.g. 30°) so the scene is seen from above and behind; entity sprites face the camera.
+* **Asset Format:** Primitive shapes (colored quads) as MVP placeholders. Final art will use single static `.png` sprites per entity type. No sprite sheets. **Sprite proportions:** width:height = 1:1.2 (e.g. 128×154 or 256×307) for isometric character sprites so they read as having height when viewed at an angle.
 * **Aesthetic:** Grimdark Dystopian Sci-Fi.
 * **Procedural Animation (Code-Driven):**
   * **Idle:** Slow, continuous subtle vertical scaling (Y-axis breathes by 2%).
-  * **Movement ("Waddle"):** When velocity > 0, rhythmically rotate sprite on Z-axis (± 5 degrees).
+  * **Movement ("Waddle"):** When velocity > 0, rhythmically rotate sprite on Z-axis (± 5 degrees) in local space.
   * **Shooting ("Recoil"):** Instantly scale down by 10%, smooth interpolate back over 0.1s.
   * **Hit Flash:** Swap material color to pure white for 0.1s upon taking damage.
 
