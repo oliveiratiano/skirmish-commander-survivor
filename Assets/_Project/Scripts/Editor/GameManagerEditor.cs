@@ -17,25 +17,25 @@ public class GameManagerEditor : Editor
         else
         {
             EditorGUILayout.Space(4);
-            EditorGUILayout.HelpBox("Commander: 3 sheets (1280×1280, 5×5 = 25 frames). Load Up, Right, Down. Idle = center frame.", MessageType.None);
+            EditorGUILayout.HelpBox("Scene Commander sprites: load 3 directional sheets (Up, Right, Down). 1280×1280, 5×5; idle = center frame.", MessageType.None);
             string startPath = System.IO.Path.Combine(Application.dataPath, "_Project", "Art", "Commander");
             if (!System.IO.Directory.Exists(startPath))
                 startPath = System.IO.Path.Combine(Application.dataPath, "_Project", "Art");
             if (!System.IO.Directory.Exists(startPath))
                 startPath = Application.dataPath;
 
-            if (GUILayout.Button("Fill Commander Sprites (Up)..."))
+            if (GUILayout.Button("Commander Up..."))
                 FillCommanderDirection(gm, startPath, "Up");
-            if (GUILayout.Button("Fill Commander Sprites (Right)..."))
+            if (GUILayout.Button("Commander Right..."))
                 FillCommanderDirection(gm, startPath, "Right");
-            if (GUILayout.Button("Fill Commander Sprites (Down)..."))
+            if (GUILayout.Button("Commander Down..."))
                 FillCommanderDirection(gm, startPath, "Down");
         }
     }
 
     void FillCommanderDirection(GameManager gm, string startPath, string direction)
     {
-        string selectedFile = EditorUtility.OpenFilePanel("Select Commander sprite sheet " + direction + " (PNG, 1280×1280)", startPath, "png");
+        string selectedFile = EditorUtility.OpenFilePanel("Select sprite sheet " + direction + " (1280×1280 PNG)", startPath, "png");
         if (string.IsNullOrEmpty(selectedFile)) return;
         try
         {
