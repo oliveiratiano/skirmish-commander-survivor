@@ -20,9 +20,23 @@ public static class GameConstants
     public const float ATTENTION_PROMPT_TIMEOUT = 5f;
     public const float AI_REACTION_DELAY = 0.3f;
     public const float RELAY_HOP_DELAY = 0.5f;
-    public const float RELAY_RADIUS = 10f;
+    public const float RELAY_RADIUS = 13f;
+    public const float COMMAND_FEEDBACK_DELAY = 1f;
+    public const float COMMAND_FEEDBACK_DURATION = 1f;
+    public const float COMMANDER_RADIUS = 2.5f;
 
     public static readonly Color ARENA_COLOR = new Color(0.184f, 0.176f, 0.165f); // #2F2D2A
     public static readonly Color DANGER_ZONE_COLOR = new Color(0.6f, 0.05f, 0.05f, 0.25f);
     public static readonly Color DANGER_EDGE_COLOR = new Color(0.9f, 0.1f, 0.1f, 0.8f);
+
+    public static Color CommandIconColor(CommandState state)
+    {
+        switch (state)
+        {
+            case CommandState.Attack: return new Color(0.9f, 0.25f, 0.2f, 0.9f);
+            case CommandState.FormUp: return new Color(0.2f, 0.8f, 0.3f, 0.9f);
+            case CommandState.Regroup: return new Color(0.2f, 0.4f, 0.9f, 0.9f);
+            default: return Color.white;
+        }
+    }
 }

@@ -15,6 +15,8 @@ public class UnitAIController : MonoBehaviour
     Transform _promptedIndicator;
     CommandState _relayPendingState;
     float _relayTimer = -1f;
+    float _feedbackDelay = -1f;
+    CommandState _feedbackCommand;
 
     enum ShootPrepPhase
     {
@@ -28,8 +30,8 @@ public class UnitAIController : MonoBehaviour
     ShootPrepPhase _shootPrepPhase = ShootPrepPhase.OutOfRange;
 
     bool _movementLocked;
-    CommandState _currentCommand = CommandState.Follow;
-    CommandState _effectiveCommand = CommandState.Follow;
+    CommandState _currentCommand = CommandState.FormUp;
+    CommandState _effectiveCommand = CommandState.FormUp;
     float _reactionTimer = -1f;
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
@@ -49,7 +51,7 @@ public class UnitAIController : MonoBehaviour
 
         _health.OnDied += HandleDeath;
 
-        _currentCommand = CommandState.Follow;
+        _currentCommand = CommandState.FormUp;
 
         if (isPlayer && GameManager.Instance != null && GameManager.Instance.playerUnitTypes != null)
         {
@@ -94,6 +96,8 @@ public class UnitAIController : MonoBehaviour
         if (state == _currentCommand) return;
         _currentCommand = state;
         _reactionTimer = GameConstants.AI_REACTION_DELAY;
+        _feedbackDelay = GameConstants.COMMAND_FEEDBACK_DELAY;
+        _feedbackCommand = state;
         if (withPropagation)
         {
             _relayPendingState = state;
@@ -124,10 +128,10 @@ public class UnitAIController : MonoBehaviour
                 {
                     CommandState previousEffective = _effectiveCommand;
                     _effectiveCommand = _currentCommand;
-                    if (_effectiveCommand == CommandState.Retreat)
-                        EnterRetreatMode();
-                    else if (previousEffective == CommandState.Retreat)
-                        ExitRetreatMode();
+                    if (_effectiveCommand == CommandState.Regroup)
+                        EnterRegroupMode();
+                    else if (previousEffective == CommandState.Regroup)
+                        ExitRegroupMode();
                     _reactionTimer = -1f;
                 }
             }
@@ -150,6 +154,16 @@ public class UnitAIController : MonoBehaviour
                             other.ReceiveCommand(_relayPendingState, true);
                     }
                     _relayTimer = -1f;
+                }
+            }
+            if (_feedbackDelay > 0f)
+            {
+                _feedbackDelay -= Time.deltaTime;
+                if (_feedbackDelay <= 0f)
+                {
+                    var display = GetComponent<CommandFeedbackDisplay>();
+                    if (display != null) display.ShowCommand(_feedbackCommand);
+                    _feedbackDelay = -1f;
                 }
             }
             UpdatePlayerUnit();
@@ -179,23 +193,23 @@ public class UnitAIController : MonoBehaviour
 
         switch (state)
         {
-            case CommandState.Engage:
+            case CommandState.Attack:
                 if (_attack != null)
                     _attack.enabled = true;
-                HandleEngage();
+                HandleAttack();
                 break;
-            case CommandState.Follow:
+            case CommandState.FormUp:
                 if (_attack != null)
                     _attack.enabled = true;
-                HandleFollow();
+                HandleFormUp();
                 break;
-            case CommandState.Retreat:
-                HandleRetreat();
+            case CommandState.Regroup:
+                HandleRegroup();
                 break;
         }
     }
 
-    void HandleEngage()
+    void HandleAttack()
     {
         Transform nearest = FindNearest(AllEnemyUnits);
         if (nearest == null)
@@ -222,7 +236,7 @@ public class UnitAIController : MonoBehaviour
         }
     }
 
-    void HandleFollow()
+    void HandleFormUp()
     {
         if (CommanderController.Instance == null)
         {
@@ -257,13 +271,25 @@ public class UnitAIController : MonoBehaviour
         }
     }
 
-    void HandleRetreat()
+    void HandleRegroup()
     {
         if (_attack != null)
             _attack.enabled = false;
 
         ClearShootPrepState();
         _movementLocked = false;
+
+        if (CommanderController.Instance != null)
+        {
+            float dist = (CommanderController.Instance.transform.position - transform.position).magnitude;
+            if (dist <= GameConstants.COMMANDER_RADIUS)
+            {
+                _currentCommand = CommandState.FormUp;
+                _effectiveCommand = CommandState.FormUp;
+                ExitRegroupMode();
+                return;
+            }
+        }
         MoveTowardCommander(1f);
     }
 
@@ -336,7 +362,7 @@ public class UnitAIController : MonoBehaviour
             _attack.CanFire = false;
     }
 
-    void EnterRetreatMode()
+    void EnterRegroupMode()
     {
         if (_attack != null)
         {
@@ -347,7 +373,7 @@ public class UnitAIController : MonoBehaviour
         _movementLocked = false;
     }
 
-    void ExitRetreatMode()
+    void ExitRegroupMode()
     {
         if (_attack != null)
         {
@@ -363,7 +389,7 @@ public class UnitAIController : MonoBehaviour
 
         Vector3 commanderPos = CommanderController.Instance.transform.position;
         Vector3 toCommander = commanderPos - transform.position;
-        float perimeterRadius = 2.5f;
+        float perimeterRadius = GameConstants.COMMANDER_RADIUS;
 
         if (toCommander.magnitude > perimeterRadius)
         {

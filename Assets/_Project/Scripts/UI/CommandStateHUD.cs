@@ -5,7 +5,7 @@ public class CommandStateHUD : MonoBehaviour
     GUIStyle _style;
     GUIStyle _activeStyle;
 
-    readonly string[] _stateNames = { "ENGAGE [→]", "FOLLOW [↑]", "RETREAT [↓]" };
+    readonly string[] _stateNames = { "ATTACK [→]", "FORM UP [↑]", "REGROUP [↓]" };
     readonly Color[] _stateColors = { new Color(0.9f, 0.3f, 0.2f), new Color(0.2f, 0.7f, 0.9f), new Color(0.9f, 0.8f, 0.2f) };
 
     void OnGUI()

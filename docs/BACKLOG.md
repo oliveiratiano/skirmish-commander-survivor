@@ -94,7 +94,7 @@ Each feature entry includes:
 
 **Files:** `InputHandler.cs`, `CommandSystem.cs`, `UnitAIController.cs`, `GameConstants.cs`
 
-**Test:** Shift+Retreat with some units in oval. Command spreads. Unit dies mid-chain = chain stops.
+**Test:** Shift+Regroup with some units in oval. Command spreads. Unit dies mid-chain = chain stops.
 
 | Status |
 |--------|
@@ -118,7 +118,7 @@ Each feature entry includes:
 
 ### Slice 7: Visual Command Feedback
 
-**What:** Commander shows icon on issue. Units show same icon 1s after receiving. One visual per command (Engage, Follow, Retreat).
+**What:** Commander shows icon on issue. Units show same icon 1s after receiving. One visual per command (Attack, Form Up, Regroup).
 
 **Files:** New `CommandFeedbackDisplay` component, `CommandSystem.cs`, placeholder art/icons
 
@@ -126,13 +126,13 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
 ## To Review
 
-- **Command names:** Review naming of command states (Engage, Follow, Retreat). In particular, "Follow" may be misleading: e.g. Sharpshooter stands still while an enemy is in range (and has long range), which is intended behavior, but "Follow" might suggest movement toward the Commander. Consider names that better reflect "hold position / shoot when in range" vs "move toward Commander" if we rename.
+_(None at this time. Command names were updated to Attack / Form Up / Regroup; Regroup transitions to Form Up when within Commander radius.)_
 
 ---
 

@@ -18,15 +18,15 @@
 ## 3. Controls & Command States
 * **Movement:** Player directly controls the Commander via WASD.
 * **Command Toggles:** Arrow keys broadcast global state changes to all player units via a C# Event System.
-  * **Right Arrow** = Engage
-  * **Up Arrow** = Follow
-  * **Down Arrow** = Retreat
+  * **Right Arrow** = Attack
+  * **Up Arrow** = Form Up
+  * **Down Arrow** = Regroup
 
 | State | Movement Behavior | Combat Behavior |
 | :--- | :--- | :--- |
-| **Engage** | Break formation. Move toward absolute closest enemy. | Fire weapon when in range and off cooldown. |
-| **Follow** | Path toward Commander to form a loose perimeter. | If enemy is in range, enter **shoot-preparation stage** (brief pause simulating reload/aim), fire, then resume movement. Units move slower than Retreat when engaged in combat due to stop-and-shoot cycles. |
-| **Retreat** | Path directly to Commander's exact position urgently. | **Do not attack.** Ignore enemies to prioritize repositioning. |
+| **Attack** | Break formation. Move toward absolute closest enemy. | Fire weapon when in range and off cooldown. |
+| **Form Up** | Path toward Commander to form a loose perimeter. | If enemy is in range, enter **shoot-preparation stage** (brief pause simulating reload/aim), fire, then resume movement. Units move slower than Regroup when engaged in combat due to stop-and-shoot cycles. |
+| **Regroup** | Path directly to Commander's exact position urgently. When within **Commander radius**, unit switches to **Form Up** and can shoot again. | **Do not attack** while regrouping. Ignore enemies to prioritize repositioning. |
 
 ## 4. Entity Attribute Matrix
 All combat is ranged. Accuracy uses **Aim Deviation** (rotating the perfect vector to the target by a random angle within the "Accuracy Spread"). Projectiles are visible traveling bullets with speed and lifetime. Projectiles pass harmlessly through friendly units.

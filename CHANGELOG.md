@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - Editor menu setup script (Commander Survival > Full Setup) for one-click project initialization
 
 ### Changed
+- Command renames (Engage→Attack, Follow→Form Up, Retreat→Regroup); single `COMMANDER_RADIUS` constant; Regroup switches to Form Up when unit is within radius.
+- Visual command feedback: Commander shows command icon on issue; units show same icon 1s after receiving (placeholder colored quads per command) (Slice 7).
 - Shift+arrow enables relay: receiving units pass command to nearby allies of the same type after 0.5s hop delay; death breaks chain (Slice 5, same-type-only relay).
 - AI reaction delay: units wait 0.3s before acting on a new command; effective command lags behind received command (Slice 6).
 - Attention mechanic: keys 1/2/3/4 prompt unit types (additive, 5s timeout); arrow sends command only to prompted types in oval when set, else all in oval; prompted units show indicator (Slice 4).

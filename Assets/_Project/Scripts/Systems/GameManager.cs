@@ -35,6 +35,7 @@ public class GameManager : MonoBehaviour
         CommanderObject.AddComponent<HitFlashComponent>();
         CommanderObject.AddComponent<ProceduralAnimator>();
         CommanderObject.AddComponent<ShoutOvalDisplay>();
+        CommanderObject.AddComponent<CommandFeedbackDisplay>();
 
         var cam = Camera.main.GetComponent<CameraController>();
         if (cam != null)

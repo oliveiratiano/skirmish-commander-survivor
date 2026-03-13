@@ -4,16 +4,16 @@ using UnityEngine;
 
 public enum CommandState
 {
-    Engage,
-    Follow,
-    Retreat
+    Attack,
+    FormUp,
+    Regroup
 }
 
 public class CommandSystem : MonoBehaviour
 {
     public static CommandSystem Instance { get; private set; }
 
-    public CommandState CurrentState { get; private set; } = CommandState.Follow;
+    public CommandState CurrentState { get; private set; } = CommandState.FormUp;
 
     public event Action<CommandState> OnStateChanged;
 
@@ -78,6 +78,12 @@ public class CommandSystem : MonoBehaviour
                     continue;
             }
             u.ReceiveCommand(newState, withRelay);
+        }
+
+        if (CommanderController.Instance != null)
+        {
+            var display = CommanderController.Instance.GetComponent<CommandFeedbackDisplay>();
+            if (display != null) display.ShowCommand(newState);
         }
 
         OnStateChanged?.Invoke(newState);

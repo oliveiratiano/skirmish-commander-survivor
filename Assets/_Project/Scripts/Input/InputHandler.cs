@@ -43,11 +43,11 @@ public class InputHandler : MonoBehaviour
 
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
         if (Input.GetKeyDown(KeyCode.RightArrow))
-            OnCommandStateChanged?.Invoke(CommandState.Engage, shiftHeld);
+            OnCommandStateChanged?.Invoke(CommandState.Attack, shiftHeld);
         if (Input.GetKeyDown(KeyCode.UpArrow))
-            OnCommandStateChanged?.Invoke(CommandState.Follow, shiftHeld);
+            OnCommandStateChanged?.Invoke(CommandState.FormUp, shiftHeld);
         if (Input.GetKeyDown(KeyCode.DownArrow))
-            OnCommandStateChanged?.Invoke(CommandState.Retreat, shiftHeld);
+            OnCommandStateChanged?.Invoke(CommandState.Regroup, shiftHeld);
 
         if (Input.GetKeyDown(KeyCode.F3))
             OnDebugToggle?.Invoke();

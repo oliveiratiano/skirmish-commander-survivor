@@ -24,6 +24,7 @@ public class UnitSpawner : MonoBehaviour
 
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
+        go.AddComponent<CommandFeedbackDisplay>();
 
         if (DebugOverlay.Instance != null)
             DebugOverlay.Instance.SetPlayerUnitCount(UnitAIController.AllPlayerUnits.Count);
