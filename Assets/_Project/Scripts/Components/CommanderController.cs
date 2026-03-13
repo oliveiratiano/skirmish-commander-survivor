@@ -8,6 +8,9 @@ public class CommanderController : MonoBehaviour
 
     MovementComponent _movement;
     HealthComponent _health;
+    Vector2 _facing = new Vector2(0f, -1f);
+
+    public Vector2 FacingDirection => _facing;
 
     void Awake()
     {
@@ -22,10 +25,16 @@ public class CommanderController : MonoBehaviour
         if (InputHandler.Instance == null) return;
 
         Vector2 input = InputHandler.Instance.MoveInput;
+        if (input.sqrMagnitude > 0.01f)
+            _facing = input.normalized;
+
         Vector3 dir = new Vector3(input.x, input.y, 0f);
         _movement.Move(dir);
 
         ClampToArena();
+
+        if (DebugOverlay.Instance != null && DebugOverlay.Instance.IsVisible)
+            Debug.DrawLine(transform.position, transform.position + (Vector3)(_facing * 3f), Color.cyan, 0f);
     }
 
     void ClampToArena()

@@ -10,6 +10,11 @@ public class UnitAIController : MonoBehaviour
     MovementComponent _movement;
     HealthComponent _health;
     RangedAttackComponent _attack;
+    int _unitTypeIndex = -1;
+    public int UnitTypeIndex => _unitTypeIndex;
+    Transform _promptedIndicator;
+    CommandState _relayPendingState;
+    float _relayTimer = -1f;
 
     enum ShootPrepPhase
     {
@@ -23,8 +28,9 @@ public class UnitAIController : MonoBehaviour
     ShootPrepPhase _shootPrepPhase = ShootPrepPhase.OutOfRange;
 
     bool _movementLocked;
-    CommandState _lastPlayerState = CommandState.Follow;
-    bool _hasLastPlayerState;
+    CommandState _currentCommand = CommandState.Follow;
+    CommandState _effectiveCommand = CommandState.Follow;
+    float _reactionTimer = -1f;
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
     public static readonly System.Collections.Generic.List<UnitAIController> AllEnemyUnits
@@ -43,10 +49,56 @@ public class UnitAIController : MonoBehaviour
 
         _health.OnDied += HandleDeath;
 
+        _currentCommand = CommandState.Follow;
+
+        if (isPlayer && GameManager.Instance != null && GameManager.Instance.playerUnitTypes != null)
+        {
+            var arr = GameManager.Instance.playerUnitTypes;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arr[i] == unitData) { _unitTypeIndex = i; break; }
+            }
+        }
+
         if (isPlayer)
             AllPlayerUnits.Add(this);
         else
             AllEnemyUnits.Add(this);
+    }
+
+    void Start()
+    {
+        if (IsPlayerUnit && _promptedIndicator == null)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            go.name = "PromptedIndicator";
+            go.transform.SetParent(transform, worldPositionStays: false);
+            go.transform.localPosition = new Vector3(0f, 0.6f, 0f);
+            go.transform.localScale = Vector3.one * 0.35f;
+            var r = go.GetComponent<Renderer>();
+            if (r != null)
+            {
+                var mat = new Material(Shader.Find("Sprites/Default"));
+                mat.color = new Color(1f, 0.9f, 0.3f, 0.85f);
+                r.material = mat;
+            }
+            var col = go.GetComponent<Collider>();
+            if (col != null) Object.Destroy(col);
+            _promptedIndicator = go.transform;
+            _promptedIndicator.gameObject.SetActive(false);
+        }
+    }
+
+    public void ReceiveCommand(CommandState state, bool withPropagation = false)
+    {
+        if (state == _currentCommand) return;
+        _currentCommand = state;
+        _reactionTimer = GameConstants.AI_REACTION_DELAY;
+        if (withPropagation)
+        {
+            _relayPendingState = state;
+            _relayTimer = GameConstants.RELAY_HOP_DELAY;
+        }
     }
 
     void OnDestroy()
@@ -64,7 +116,50 @@ public class UnitAIController : MonoBehaviour
         if (_health != null && _health.IsDead) return;
 
         if (IsPlayerUnit)
+        {
+            if (_reactionTimer > 0f)
+            {
+                _reactionTimer -= Time.deltaTime;
+                if (_reactionTimer <= 0f)
+                {
+                    CommandState previousEffective = _effectiveCommand;
+                    _effectiveCommand = _currentCommand;
+                    if (_effectiveCommand == CommandState.Retreat)
+                        EnterRetreatMode();
+                    else if (previousEffective == CommandState.Retreat)
+                        ExitRetreatMode();
+                    _reactionTimer = -1f;
+                }
+            }
+            if (_relayTimer > 0f)
+            {
+                _relayTimer -= Time.deltaTime;
+                if (_relayTimer <= 0f)
+                {
+                    float r2 = GameConstants.RELAY_RADIUS * GameConstants.RELAY_RADIUS;
+                    Vector3 myPos = transform.position;
+                    for (int i = 0; i < AllPlayerUnits.Count; i++)
+                    {
+                        var other = AllPlayerUnits[i];
+                        if (other == null || other == this || !other.gameObject.activeInHierarchy) continue;
+                        var otherHealth = other.GetComponent<HealthComponent>();
+                        if (otherHealth != null && otherHealth.IsDead) continue;
+                        if (_unitTypeIndex < 0 || other.UnitTypeIndex != _unitTypeIndex) continue;
+                        float distSq = (other.transform.position - myPos).sqrMagnitude;
+                        if (distSq <= r2)
+                            other.ReceiveCommand(_relayPendingState, true);
+                    }
+                    _relayTimer = -1f;
+                }
+            }
             UpdatePlayerUnit();
+            if (_promptedIndicator != null)
+            {
+                var prompted = InputHandler.Instance != null ? InputHandler.Instance.GetPromptedTypeIndices() : null;
+                bool show = prompted != null && prompted.Count > 0 && _unitTypeIndex >= 0 && prompted.Contains(_unitTypeIndex);
+                _promptedIndicator.gameObject.SetActive(show);
+            }
+        }
         else
             UpdateEnemyUnit();
 
@@ -80,25 +175,7 @@ public class UnitAIController : MonoBehaviour
 
     void UpdatePlayerUnit()
     {
-        CommandState state = CommandSystem.Instance != null
-            ? CommandSystem.Instance.CurrentState
-            : CommandState.Follow;
-
-        if (!_hasLastPlayerState)
-        {
-            _lastPlayerState = state;
-            _hasLastPlayerState = true;
-        }
-
-        if (_lastPlayerState != state)
-        {
-            if (state == CommandState.Retreat)
-                EnterRetreatMode();
-            else if (_lastPlayerState == CommandState.Retreat)
-                ExitRetreatMode();
-        }
-
-        _lastPlayerState = state;
+        CommandState state = _effectiveCommand;
 
         switch (state)
         {

@@ -6,6 +6,8 @@ public class GameManager : MonoBehaviour
 
     [Header("References")]
     public UnitData commanderData;
+    [Tooltip("Ordered: index 0 = key 1, 1 = key 2, 2 = key 3. Same as DraftUI available units.")]
+    public UnitData[] playerUnitTypes;
 
     public GameObject CommanderObject { get; private set; }
 
@@ -32,6 +34,7 @@ public class GameManager : MonoBehaviour
 
         CommanderObject.AddComponent<HitFlashComponent>();
         CommanderObject.AddComponent<ProceduralAnimator>();
+        CommanderObject.AddComponent<ShoutOvalDisplay>();
 
         var cam = Camera.main.GetComponent<CameraController>();
         if (cam != null)

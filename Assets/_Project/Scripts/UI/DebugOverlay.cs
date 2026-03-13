@@ -5,6 +5,7 @@ public class DebugOverlay : MonoBehaviour
     public static DebugOverlay Instance { get; private set; }
 
     bool _visible = false;
+    public bool IsVisible => _visible;
 
     float _deltaTime;
     int _playerUnitCount;

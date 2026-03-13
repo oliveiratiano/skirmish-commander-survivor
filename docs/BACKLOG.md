@@ -42,7 +42,7 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -56,7 +56,7 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -70,7 +70,7 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -84,7 +84,7 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -98,7 +98,7 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -112,7 +112,7 @@ Each feature entry includes:
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -127,6 +127,12 @@ Each feature entry includes:
 | Status |
 |--------|
 | [ ] Not started |
+
+---
+
+## To Review
+
+- **Command names:** Review naming of command states (Engage, Follow, Retreat). In particular, "Follow" may be misleading: e.g. Sharpshooter stands still while an enemy is in range (and has long range), which is intended behavior, but "Follow" might suggest movement toward the Commander. Consider names that better reflect "hold position / shoot when in range" vs "move toward Commander" if we rename.
 
 ---
 

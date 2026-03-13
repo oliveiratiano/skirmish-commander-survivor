@@ -152,6 +152,7 @@ public static class ProjectSetup
         GameObject gmGO = CreateEmpty("GameManager");
         var gm = gmGO.AddComponent<GameManager>();
         gm.commanderData = commanderData;
+        gm.playerUnitTypes = new UnitData[] { closeQuarters, machineGunner, sharpshooter };
 
         GameObject spawnerGO = CreateEmpty("UnitSpawner");
         spawnerGO.AddComponent<UnitSpawner>();

@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - Editor menu setup script (Commander Survival > Full Setup) for one-click project initialization
 
 ### Changed
+- Shift+arrow enables relay: receiving units pass command to nearby allies of the same type after 0.5s hop delay; death breaks chain (Slice 5, same-type-only relay).
+- AI reaction delay: units wait 0.3s before acting on a new command; effective command lags behind received command (Slice 6).
+- Attention mechanic: keys 1/2/3/4 prompt unit types (additive, 5s timeout); arrow sends command only to prompted types in oval when set, else all in oval; prompted units show indicator (Slice 4).
+- Commands are directional: only units inside the shout oval in front of the Commander receive them; others keep current state (Slice 3).
+- Commander has a facing direction from last movement (default down); FacingDirection exposed; shout oval constants added for Slice 3 (Slice 2).
+- Command state is now per-unit (each unit stores its own state; CommandSystem broadcasts to all on arrow key). No gameplay change; foundation for directional commands (BACKLOG Slice 1).
 - Arena size reduced from 400x400 to 120x120 units (4-6 screens)
 - Swarm Bug stats retuned: HP 15->20, speed 3.5->4.0, damage 5->7
 - Wave difficulty increased: 100 enemies (was 60), faster spawn ramp (1.5s base, 0.2s min), steeper interval decay
