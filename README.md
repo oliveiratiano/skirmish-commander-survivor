@@ -55,5 +55,6 @@ Assets/
 | Document | Description |
 |----------|-------------|
 | [SPEC](docs/SPEC.md) | Product specification and requirements |
+| [BACKLOG](docs/BACKLOG.md) | Feature backlog with incremental slices and test criteria |
 | [ADRs](docs/adr/) | Architecture Decision Records |
 | [CHANGELOG](CHANGELOG.md) | Version history |

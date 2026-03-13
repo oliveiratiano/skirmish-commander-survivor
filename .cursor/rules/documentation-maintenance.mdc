@@ -10,6 +10,7 @@ After completing any significant task, check:
 1. **Feature introduced or changed?** → Update `CHANGELOG.md` (under `[Unreleased]`) and `docs/SPEC.md` if requirements evolved.
 2. **Architectural decision with alternatives?** → Create a new ADR in `docs/adr/` with sequential numbering.
 3. **Setup or run steps changed?** → Update `README.md`.
+4. **Feature on the backlog?** → Check `docs/BACKLOG.md`. If a slice or feature was delivered, mark its status as done (e.g. `[x]` in place of `[ ]`).
 
 ## Conventions
 
