@@ -57,6 +57,9 @@ public class ProceduralAnimator : MonoBehaviour
             _recoilTimer -= Time.deltaTime;
         }
 
+        // Preserve scale.x sign (left/right flip) set by SpriteSheetAnimator so both can coexist
+        scale.x = Mathf.Abs(scale.x) * (transform.localScale.x >= 0f ? 1f : -1f);
+
         transform.localScale = scale;
         float isoAngle = GameConstants.ISOMETRIC_CAMERA_ANGLE;
         transform.rotation = Quaternion.Euler(isoAngle, 0f, 0f) * Quaternion.Euler(0f, 0f, rotation);

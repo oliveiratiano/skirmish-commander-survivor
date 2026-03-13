@@ -24,11 +24,11 @@ public class GameManagerEditor : Editor
             if (!System.IO.Directory.Exists(startPath))
                 startPath = Application.dataPath;
 
-            if (GUILayout.Button("Commander Up..."))
+            if (GUILayout.Button("Load Sprites (Up)..."))
                 FillCommanderDirection(gm, startPath, "Up");
-            if (GUILayout.Button("Commander Right..."))
+            if (GUILayout.Button("Load Sprites (Right)..."))
                 FillCommanderDirection(gm, startPath, "Right");
-            if (GUILayout.Button("Commander Down..."))
+            if (GUILayout.Button("Load Sprites (Down)..."))
                 FillCommanderDirection(gm, startPath, "Down");
         }
     }
@@ -59,7 +59,7 @@ public class GameManagerEditor : Editor
                 UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gm.gameObject.scene);
             AssetDatabase.SaveAssets();
             Repaint();
-            EditorUtility.DisplayDialog("Load Sprites", "Loaded " + sprites.Count + " into Commander " + direction + ". Save scene (Ctrl+S).", "OK");
+            EditorUtility.DisplayDialog("Load Sprites", "Loaded " + sprites.Count + " sprites into " + direction + ". Save scene (Ctrl+S).", "OK");
         }
         catch (System.Exception ex)
         {

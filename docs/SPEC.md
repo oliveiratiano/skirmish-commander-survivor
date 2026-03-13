@@ -64,8 +64,8 @@ All combat is ranged. Accuracy uses **Aim Deviation** (rotating the perfect vect
 * **Procedural (optional):** Hit flash, recoil scale, etc. remain in addition to keyframe art.
 
 * **Asset placement and layout:**
-  * **Location:** Three PNGs per entity in `Assets/_Project/Art/<EntityName>/`, e.g. `Commander_up.png`, `Commander_right.png`, `Commander_down.png`.
-  * **Swarm Bug enemy:** Place `SwarmBug_up.png`, `SwarmBug_right.png`, and `SwarmBug_down.png` in `Assets/_Project/Art/Sprites/SwarmBug/` and assign them to `SwarmBugData` in the Inspector using **Load Sprites (Up)**, **(Right)**, and **(Down)**. They follow the same 1280×1280, 5×5 grid, idle index 12, walk frames 0–24 rules as other entities.
+  * **Location:** Three PNGs per entity in `Assets/_Project/Art/Sprites/<EntityName>/`. Sprite folders exist for every unit: **Commander**, **CloseQuarters**, **MachineGunner**, **Sharpshooter**, **SwarmBug**. Use filenames like `Commander_up.png`, `Commander_right.png`, `Commander_down.png` (or `<EntityName>_up/right/down.png`).
+  * **Assign in Inspector:** Select the unit’s `UnitData` asset (e.g. `SwarmBugData`, `CloseQuartersData`) and use **Load Sprites (Up)**, **(Right)**, **(Down)**. Same 1280×1280, 5×5, idle index 12, walk 0–24 for all entities.
   * **Strict dimensions:** Each PNG **must** be exactly **1280×1280 pixels**. Cell size **256×256 px** (5×5). Wrong sizes cause slice errors. Source of truth: `GameConstants.SPRITE_SHEET_*`.
   * **Unity:** Auto-import under `Assets/_Project/Art/` applies 5×5 slice for 1280×1280; or use menu **Commander Survival → Slice Selected Texture 5x5 (25 sprites)**. Load each sheet via Inspector: **Load Sprites (Up)**, **(Right)**, **(Down)**.
   * **Summary:** Three PNGs per entity, **exactly 1280×1280 px** each, 5×5 grid (256×256 per cell). Idle = frame 12; walk = all 25; no shoot frames from sheet.
