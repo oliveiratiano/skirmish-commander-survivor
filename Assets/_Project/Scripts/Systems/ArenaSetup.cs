@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class ArenaSetup : MonoBehaviour
 {
+    [Tooltip("Tiling count for grass texture (repeats per arena side).")]
+    public float grassTiling = 15f;
+
     void Awake()
     {
         CreateArenaPlane();
@@ -17,8 +20,19 @@ public class ArenaSetup : MonoBehaviour
         plane.transform.rotation = Quaternion.identity;
 
         Renderer r = plane.GetComponent<Renderer>();
-        r.material = new Material(Shader.Find("Sprites/Default"));
-        r.material.color = GameConstants.ARENA_COLOR;
+        Material mat = new Material(Shader.Find("Sprites/Default"));
+        Texture2D grassTex = Resources.Load<Texture2D>("grass_tile");
+        if (grassTex != null)
+        {
+            mat.mainTexture = grassTex;
+            mat.mainTextureScale = new Vector2(grassTiling, grassTiling);
+            mat.color = Color.white;
+        }
+        else
+        {
+            mat.color = GameConstants.ARENA_COLOR;
+        }
+        r.material = mat;
         r.sortingOrder = -100;
 
         Collider col = plane.GetComponent<Collider>();

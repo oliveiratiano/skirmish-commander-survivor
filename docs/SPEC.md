@@ -52,15 +52,26 @@ All combat is ranged. Accuracy uses **Aim Deviation** (rotating the perfect vect
 * **Physics:** Do **NOT** use rigidbodies or complex physics. Use simple Vector math overlap checks. Units use soft local-avoidance (boids) with lightweight friendly collision.
 * **Architecture:** Use **Composition over Inheritance** (e.g., `HealthComponent`, `RangedAttackComponent`) and drive stats via ScriptableObjects (`UnitData`).
 
-## 7. Design, Assets & Procedural Animation
-* **View:** Isometric. Camera is tilted (e.g. 30°) so the scene is seen from above and behind; entity sprites face the camera.
-* **Asset Format:** Primitive shapes (colored quads) as MVP placeholders. Final art will use single static `.png` sprites per entity type. No sprite sheets. **Sprite proportions:** width:height = 1:1.2 (e.g. 128×154 or 256×307) for isometric character sprites so they read as having height when viewed at an angle.
+## 7. Design, Assets & Animation
+* **View:** Isometric. Camera is tilted so the scene is seen from above and behind; entity sprites face the camera.
 * **Aesthetic:** Grimdark Dystopian Sci-Fi.
-* **Procedural Animation (Code-Driven):**
-  * **Idle:** Slow, continuous subtle vertical scaling (Y-axis breathes by 2%).
-  * **Movement ("Waddle"):** When velocity > 0, rhythmically rotate sprite on Z-axis (± 5 degrees) in local space.
-  * **Shooting ("Recoil"):** Instantly scale down by 10%, smooth interpolate back over 0.1s.
-  * **Hit Flash:** Swap material color to pure white for 0.1s upon taking damage.
+* **Sprite Art (Keyframe Animation):**
+  * Each entity type has a small set of **animation frames** (same isometric angle and pose style for all frames). Frames are played by state so the game reads as animated, not a single floating image.
+  * **Per-cell aspect:** width:height = 1:1.2 per frame (cell size **256×307 px**; see strict sheet dimensions below).
+  * **Format:** `.png` with transparency. One **sprite sheet** per entity; the runtime picks the correct frame by index.
+  * **Frame sets per entity (fixed for grid):** Idle **3** frames (indices 0–2) · Walk **6** frames (indices 3–8) · Shoot **2** frames (indices 9–10). Hit = procedural flash (no extra frame). Index **11** = unused/spare.
+  * **State logic:** Idle when not moving and not shooting; Walk when moving; Shoot triggers shoot frames then reverts. No directional variants (single facing; sprites always face the camera).
+* **Technical:** Animation is driven by game state (velocity, firing). Use Unity **Animator** + **Animation** clips (or a small script) to swap `SpriteRenderer.sprite` or advance sprite-sheet index by state. One controller per entity type (or shared with overridden clips).
+* **Procedural (optional):** Light code-driven effects may remain (e.g. hit flash tint, subtle scale on shoot) in addition to keyframe art.
+
+* **Asset placement and layout (streamlined — no manual slice editing):**
+  * **Location:** One PNG per entity in `Assets/_Project/Art/<EntityName>/`, e.g. `Commander/Commander.png`, `SwarmBug/SwarmBug.png`.
+  * **Strict dimensions (required for pipeline):** The sprite sheet PNG **must** be exactly **1536×614 pixels** (width × height). Cell size is **256×307 px** (6 columns × 2 rows). No other dimensions are supported; wrong sizes cause slice errors (e.g. rect outside texture). Source of truth in code: `GameConstants.SPRITE_SHEET_*`.
+  * **One sheet, fixed grid:** Each entity uses a **single sprite sheet** with this **fixed grid**. Unity slices by grid; the game uses **sprite index** (0–11). Left-to-right, top-to-bottom:
+    * **Row 0:** Idle (3) then Walk (3): indices **0, 1, 2** = idle · **3, 4, 5** = walk.
+    * **Row 1:** Walk (3) then Shoot (2) then spare: indices **6, 7, 8** = walk · **9, 10** = shoot · **11** = unused (or hit).
+  * **Unity:** Import the PNG → Texture Type = **Sprite (2D and UI)**, Sprite Mode = **Multiple**. Auto-import under `Assets/_Project/Art/` applies 6×2 slice; or use menu **Commander Survival → Slice Selected Texture 6x2 (12 sprites)**. Pixels Per Unit: **64**. Filter Mode as needed.
+  * **Summary:** One PNG per entity, **exactly 1536×614 px**, 6×2 grid (256×307 per cell). Game uses indices 0–2 idle, 3–8 walk, 9–10 shoot.
 
 ## 8. QA, Playtesting & Architecture Tracking
 * **Debug Overlay:** MVP includes a UI toggle (Press F3) displaying: FPS, frame time, Active Command State, Active Player Units, Active Enemies, Pooled Projectiles, Pooled Enemies, Spawn Rate.

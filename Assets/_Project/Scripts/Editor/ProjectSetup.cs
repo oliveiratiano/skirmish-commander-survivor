@@ -8,11 +8,13 @@ public static class ProjectSetup
 {
     const string DATA_PATH = "Assets/_Project/Data";
     const string SCENE_PATH = "Assets/_Project/Scenes";
+    const string ART_PATH = "Assets/_Project/Art";
 
     [MenuItem("Commander Survival/1. Create All Data Assets", priority = 1)]
     static void CreateDataAssets()
     {
         EnsureDirectory(DATA_PATH);
+        EnsureArtFolderStructure();
 
         CreateUnitData("CommanderData", new UnitDataConfig
         {
@@ -296,5 +298,12 @@ public static class ProjectSetup
                 current = next;
             }
         }
+    }
+
+    static void EnsureArtFolderStructure()
+    {
+        EnsureDirectory(ART_PATH);
+        // Only Art/ is ensured. Do not create unit subfolders (Commander, CloseQuarters, etc.);
+        // users place sprite sheets where they want under Art/ and the import script does not create directories.
     }
 }

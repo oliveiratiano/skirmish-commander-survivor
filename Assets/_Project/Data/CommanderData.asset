@@ -14,6 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
   unitName: Commander
   unitColor: {r: 0.2, g: 0.6, b: 1, a: 1}
+  sprites:
+  - {fileID: -4044333197085938034, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 4329214717564483468, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: -5015958770355457260, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: -2544921288091783451, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 6131726529524764310, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: -4671749962859315360, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 6678252662043288974, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 1544792134887576441, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 3869550530443515873, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 2452760166855383847, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: 3705775257878066561, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
+  - {fileID: -4248085453063599230, guid: fc6ea7771cb56c943b9eededc7ccd5b3, type: 3}
   cost: 0
   maxHP: 100
   moveSpeed: 5

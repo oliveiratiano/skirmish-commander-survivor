@@ -27,11 +27,27 @@ public static class GameConstants
 
     // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.
     public const float ISOMETRIC_CAMERA_ANGLE = 45f;
-    public const float ISOMETRIC_CAMERA_OFFSET_Y = 20f;
-    public const float ISOMETRIC_CAMERA_OFFSET_Z = -24f;
+    public const float ISOMETRIC_CAMERA_OFFSET_Y = 16f;   // 20% closer than previous 20
+    public const float ISOMETRIC_CAMERA_OFFSET_Z = -19.2f; // 20% closer than previous -24
     public const int ISOMETRIC_SORT_BASE_ORDER = 1000;
     public const int ISOMETRIC_SORT_SCALE = 10;
     public const int ISOMETRIC_SORT_PROJECTILE_ORDER = 10000;
+
+    // Sprite sheet dimensions (single source of truth — must match SPEC and art pipeline)
+    public const int SPRITE_SHEET_GRID_COLS = 6;
+    public const int SPRITE_SHEET_GRID_ROWS = 2;
+    public const int SPRITE_SHEET_CELL_WIDTH = 256;
+    public const int SPRITE_SHEET_CELL_HEIGHT = 307;
+    public const int SPRITE_SHEET_WIDTH = SPRITE_SHEET_GRID_COLS * SPRITE_SHEET_CELL_WIDTH;  // 1536
+    public const int SPRITE_SHEET_HEIGHT = SPRITE_SHEET_GRID_ROWS * SPRITE_SHEET_CELL_HEIGHT; // 614
+    public const float SPRITE_SHEET_PIXELS_PER_UNIT = 64f;
+
+    // Commander sprite sheet: scale so 256px @ 64 PPU fits ~1 unit; animation cycle speed
+    public const float COMMANDER_SPRITE_SCALE = 0.25f;
+    public const float UNIT_SPRITE_SCALE = 0.2f;
+    public const float ENEMY_SPRITE_SCALE = 0.175f;
+    public const float SPRITE_SHEET_FRAMES_PER_SECOND = 10f;
+    public const float SHOOT_ANIM_DURATION = 0.2f;
 
     public static readonly Color ARENA_COLOR = new Color(0.184f, 0.176f, 0.165f); // #2F2D2A
     public static readonly Color DANGER_ZONE_COLOR = new Color(0.6f, 0.05f, 0.05f, 0.25f);

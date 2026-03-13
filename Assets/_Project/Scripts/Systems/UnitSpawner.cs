@@ -12,6 +12,11 @@ public class UnitSpawner : MonoBehaviour
 
     public GameObject SpawnPlayerUnit(UnitData data, Vector3 position)
     {
+        if (data.sprites != null && data.sprites.Length > 0)
+        {
+            return SpawnPlayerUnitWithSprites(data, position);
+        }
+
         GameObject go = GameManager.CreatePrimitive(data.unitName, position, data.unitColor, 0.8f);
         var move = go.AddComponent<MovementComponent>();
         move.moveSpeed = data.moveSpeed;
@@ -24,6 +29,39 @@ public class UnitSpawner : MonoBehaviour
 
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
+        go.AddComponent<IsometricSorting>();
+        go.AddComponent<CommandFeedbackDisplay>();
+
+        if (DebugOverlay.Instance != null)
+            DebugOverlay.Instance.SetPlayerUnitCount(UnitAIController.AllPlayerUnits.Count);
+
+        return go;
+    }
+
+    GameObject SpawnPlayerUnitWithSprites(UnitData data, Vector3 position)
+    {
+        var go = new GameObject(data.unitName);
+        go.transform.position = position;
+        go.transform.localScale = Vector3.one * GameConstants.UNIT_SPRITE_SCALE;
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = data.sprites[0];
+        sr.material = new Material(Shader.Find("Sprites/Default"));
+        sr.material.color = Color.white;
+
+        var move = go.AddComponent<MovementComponent>();
+        move.moveSpeed = data.moveSpeed;
+        go.AddComponent<HealthComponent>();
+        var attack = go.AddComponent<RangedAttackComponent>();
+        attack.data = data;
+        attack.isPlayerUnit = true;
+        var ai = go.AddComponent<UnitAIController>();
+        ai.Initialize(data, isPlayer: true);
+
+        go.AddComponent<HitFlashComponent>();
+        go.AddComponent<ProceduralAnimator>();
+        var anim = go.AddComponent<SpriteSheetAnimator>();
+        anim.SetSprites(data.sprites);
         go.AddComponent<IsometricSorting>();
         go.AddComponent<CommandFeedbackDisplay>();
 

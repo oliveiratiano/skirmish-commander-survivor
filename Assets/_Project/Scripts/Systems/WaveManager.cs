@@ -182,21 +182,56 @@ public class WaveManager : MonoBehaviour
     {
         if (_enemyPrefab != null) return;
 
-        _enemyPrefab = GameManager.CreatePrimitive("EnemyPrefab", Vector3.zero, enemyData.unitColor, 0.7f);
-        var move = _enemyPrefab.AddComponent<MovementComponent>();
-        move.moveSpeed = enemyData.moveSpeed;
-        _enemyPrefab.AddComponent<HealthComponent>();
-        _enemyPrefab.AddComponent<UnitAIController>();
-        var attack = _enemyPrefab.AddComponent<RangedAttackComponent>();
-        attack.data = enemyData;
-        attack.isPlayerUnit = false;
-        _enemyPrefab.AddComponent<HitFlashComponent>();
-        _enemyPrefab.AddComponent<ProceduralAnimator>();
-        _enemyPrefab.AddComponent<IsometricSorting>();
+        if (enemyData.sprites != null && enemyData.sprites.Length > 0)
+        {
+            _enemyPrefab = CreateEnemyPrefabWithSprites();
+        }
+        else
+        {
+            _enemyPrefab = GameManager.CreatePrimitive("EnemyPrefab", Vector3.zero, enemyData.unitColor, 0.7f);
+            var move = _enemyPrefab.AddComponent<MovementComponent>();
+            move.moveSpeed = enemyData.moveSpeed;
+            _enemyPrefab.AddComponent<HealthComponent>();
+            _enemyPrefab.AddComponent<UnitAIController>();
+            var attack = _enemyPrefab.AddComponent<RangedAttackComponent>();
+            attack.data = enemyData;
+            attack.isPlayerUnit = false;
+            _enemyPrefab.AddComponent<HitFlashComponent>();
+            _enemyPrefab.AddComponent<ProceduralAnimator>();
+            _enemyPrefab.AddComponent<IsometricSorting>();
+        }
+
         _enemyPrefab.SetActive(false);
 
         if (ObjectPool.Instance != null)
             ObjectPool.Instance.Prewarm("Enemy", _enemyPrefab, 100);
+    }
+
+    GameObject CreateEnemyPrefabWithSprites()
+    {
+        var go = new GameObject("EnemyPrefab");
+        go.transform.position = Vector3.zero;
+        go.transform.localScale = Vector3.one * GameConstants.ENEMY_SPRITE_SCALE;
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = enemyData.sprites[0];
+        sr.material = new Material(Shader.Find("Sprites/Default"));
+        sr.material.color = Color.white;
+
+        var move = go.AddComponent<MovementComponent>();
+        move.moveSpeed = enemyData.moveSpeed;
+        go.AddComponent<HealthComponent>();
+        go.AddComponent<UnitAIController>();
+        var attack = go.AddComponent<RangedAttackComponent>();
+        attack.data = enemyData;
+        attack.isPlayerUnit = false;
+        go.AddComponent<HitFlashComponent>();
+        go.AddComponent<ProceduralAnimator>();
+        var anim = go.AddComponent<SpriteSheetAnimator>();
+        anim.SetSprites(enemyData.sprites);
+        go.AddComponent<IsometricSorting>();
+
+        return go;
     }
 
     void UpdateDebugOverlay()

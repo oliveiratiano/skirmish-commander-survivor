@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 ### Added
+- Commander sprite sheet support: optional `commanderSprites` (12 frames) on GameManager; when set, Commander uses SpriteRenderer and SpriteSheetAnimator (idle 0–2, walk 3–8, shoot 9–10); fallback to colored quad when unset.
 - Project documentation scaffolding (SPEC, ADR-001, README, CHANGELOG)
 - M1: Unity project structure, Commander movement (WASD), flat arena, orthographic camera with dynamic zoom, F3 debug overlay
 - M2: UnitData ScriptableObjects, army drafting UI (100-point budget), unit spawning in formation, Follow behavior, boids-style friendly collision avoidance
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - Editor menu setup script (Commander Survival > Full Setup) for one-click project initialization
 
 ### Changed
+- SPEC section 7: asset model updated to keyframe sprite animation (idle 2–3, walk 4–6, shoot 1–2, optional hit); state-driven playback; sprite sheet or separate frames; 1:1.2 ratio per frame.
 - Isometric camera and visuals: camera tilted (30°) with fixed offset; entity quads tilted to face camera; Y-based depth sorting (IsometricSorting); projectiles draw on top; SPEC updated with isometric view and sprite ratio 1:1.2.
 - Command renames (Engage→Attack, Follow→Form Up, Retreat→Regroup); single `COMMANDER_RADIUS` constant; Regroup switches to Form Up when unit is within radius.
 - Visual command feedback: Commander shows command icon on issue; units show same icon 1s after receiving (placeholder colored quads per command) (Slice 7).
