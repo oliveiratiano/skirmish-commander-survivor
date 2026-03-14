@@ -132,7 +132,7 @@ Each feature entry includes:
 
 ## To Review
 
-_(None at this time. Command names were updated to Attack / Form Up / Regroup; Regroup transitions to Form Up when within Commander radius.)_
+_(None at this time. Arena floor refactor is complete; no floor-related issues remain. Command names were updated to Attack / Form Up / Regroup; Regroup transitions to Form Up when within Commander radius.)_
 
 ---
 
