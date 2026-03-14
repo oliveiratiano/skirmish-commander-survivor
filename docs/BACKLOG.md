@@ -136,22 +136,74 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 ---
 
-## Future Features (Not Yet Broken Down)
+## Planned Features (Recommended order: 1 → 2 → 3 → 4 → 5)
 
-Add new sections below as features are discussed and sliced. Use the same format: Goal, Design decisions, Slices with Test criteria.
+---
 
-<!--
-Example template:
+## Feature: Border Damage Immunity for Entering Enemies
 
-## Feature: [Name]
+**Goal:** Enemies do not take border/danger-zone damage while "entering" the arena; they take it only after they have entered and then leave the safe zone.
 
-**Goal:** ...
+**Design decisions:** Add a flag on enemy units (e.g. on `UnitAIController` or a small component) meaning "immune to boundary damage." When the unit first satisfies an "has entered arena" condition (e.g. position inside safe rectangle, or inside a smaller "core" zone), clear the flag. `ArenaBoundary.ApplyBoundaryDamage` skips enemies that have the flag set. Enemies that are spawned outside of arena boundaries start with the flag set.
 
-**Design decisions:** ...
+**Slices:** To be broken down when starting (e.g. Slice 1: add flag and set on spawn when outside arena; Slice 2: define "entered" and clear flag; Slice 3: ArenaBoundary respects flag).
 
-### Slice N: [Title]
-**What:** ...
-**Files:** ...
-**Test:** ...
-| Status | [ ] Not started |
--->
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+## Feature: Respawn Radius Around Commander + Camera Limits (Spawns Outside FOV)
+
+**Goal:** Enemies never spawn within a minimum distance of the Commander (respawn radius). Camera zoom and mobility are limited so that spawns always occur outside the player's field of view (no spawning on-screen).
+
+**Design decisions (to refine when starting):** (1) **Respawn radius:** Constant (e.g. in `GameConstants`). In `GetSpawnPosition`, reject or re-sample candidate positions until one is at least that far from the Commander (or derive positions from a ring/arc at that distance). (2) **Camera limits:** Cap max orthographic size (and optionally scroll range) so that the visible viewport never extends into the spawn region. Optionally clamp camera position so the viewport cannot pan into spawn-only zones. Result: spawn region is always off-screen.
+
+**Slices:** To be broken down when starting (e.g. Slice 1: add respawn radius and enforce in `GetSpawnPosition`; Slice 2: cap camera zoom/mobility so spawn region stays outside FOV; tune constants).
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+## Feature: Swarm Bug Swarm Behavior
+
+**Goal:** Swarm bugs behave as a swarm: when outnumbered they avoid allied units and seek peers; when the local swarm is "large enough" they commit to attack. Add some random variation to enemy behavior so runs feel less samey.
+
+**Design decisions (to refine when starting):** Define "outnumbered" (e.g. local player count vs local swarm count within a radius). "Large enough" = threshold (count or ratio). Movement: when retreating, move away from threats toward nearby allies; when engaging, current target-seeking. Random variation: e.g. slight variance in thresholds, timing, or movement choices so behavior isn't perfectly deterministic.
+
+**Slices:** To be broken down when starting (e.g. count allies in radius; retreat/seek-peers state; engage threshold; random variation in behavior).
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+## Feature: Second Stage — Hive Eradication
+
+**Goal:** A second stage/mode where the player must eliminate hive(s). Enemies spawn from hives; spawn rate or count is tied to how many units are already outside the hive / in the arena (so the encounter stays manageable and design-controllable).
+
+**Design decisions (to refine when starting):** What is a "hive" (static object, HP, spawn point). Spawn rule: e.g. "total units in arena ≤ cap" or "spawn interval increases when arena is full." Win condition: all hives destroyed (and optionally all spawned enemies). How the player selects or enters this stage (menu, after wave 1, etc.) TBD.
+
+**Slices:** To be broken down when starting (e.g. hive entity and spawn; spawn rule from "units in arena"; stage flow and win condition).
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+## Feature: Sound Design (Commands, Responses, Combat, Death)
+
+**Goal:** Add audio for commands (Commander shout), unit responses (tiered by group size + variation so it doesn't sound like one voice × N), and combat/death (e.g. bullet sounds, death cries). Use a small set of clips with random variation (pitch/volume or variants) so it feels natural and performant.
+
+**Design decisions (to refine when starting):** Command sounds per command type (Attack, Form Up, Regroup). Response sounds: 2–3 "tiers" (e.g. few units vs many) with random variation per play. One-shot combat/death sounds with optional variation. No requirement to play one clip per unit per event (pool by event type / tier).
+
+**Slices:** To be broken down when starting (e.g. audio setup and assets; command + response hooks; combat/death hooks; variation and tiers).
+
+| Status |
+|--------|
+| [ ] Not started |
