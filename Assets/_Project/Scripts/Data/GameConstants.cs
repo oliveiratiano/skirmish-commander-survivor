@@ -27,6 +27,10 @@ public static class GameConstants
 
     // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.
     public const float ISOMETRIC_CAMERA_ANGLE = 45f;
+    /// <summary>Vertical tiling multiplier for arena floor so tiles appear square on the tilted plane. Tune here if you change ISOMETRIC_CAMERA_ANGLE.</summary>
+    public const float ARENA_FLOOR_TILING_V_ASPECT = 2f;
+    /// <summary>Default floor texture when none is assigned in ArenaSetup. Must be in a Resources folder (e.g. Resources/tile-stage-1-moody-swampd). Fallback is grass_tile.</summary>
+    public const string ARENA_DEFAULT_FLOOR_TEXTURE_NAME = "tile-stage-1-moody-swampd";
     public const float ISOMETRIC_CAMERA_OFFSET_Y = 16f;   // 20% closer than previous 20
     public const float ISOMETRIC_CAMERA_OFFSET_Z = -19.2f; // 20% closer than previous -24
     public const int ISOMETRIC_SORT_BASE_ORDER = 1000;

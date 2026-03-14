@@ -2,12 +2,15 @@ using UnityEngine;
 using UnityEditor;
 
 /// <summary>
-/// Automatically configures sprite sheets under Assets/_Project/Art/ (Commander, unit subfolders).
-/// Uses GameConstants for grid and dimensions (5x5, 1280x1280). Applies slice when texture matches.
+/// Automatically configures sprite sheets only under Assets/_Project/Art/.../Sprites/ (or below).
+/// Uses GameConstants for grid and dimensions (5x5, 1280x1280). Other textures (e.g. floor tiles) are left to default import.
 /// </summary>
 public class SpriteSheetAutoImport : AssetPostprocessor
 {
     const string ART_BASE = "Assets/_Project/Art";
+    /// <summary>Only textures under a folder named "Sprites" (under Art) get 1280x1280 sprite sheet treatment.</summary>
+    const string SPRITES_FOLDER = "/Sprites/";
+
     static int GRID_COLS => GameConstants.SPRITE_SHEET_GRID_COLS;
     static int GRID_ROWS => GameConstants.SPRITE_SHEET_GRID_ROWS;
 
@@ -15,15 +18,9 @@ public class SpriteSheetAutoImport : AssetPostprocessor
     {
         var importer = (TextureImporter)assetImporter;
 
-        if (assetPath.IndexOf("grass_tile", System.StringComparison.OrdinalIgnoreCase) >= 0)
-        {
-            importer.textureType = TextureImporterType.Default;
-            importer.wrapMode = TextureWrapMode.Repeat;
-            importer.filterMode = FilterMode.Bilinear;
-            return;
-        }
-
         if (!assetPath.StartsWith(ART_BASE + "/") || !assetPath.EndsWith(".png", System.StringComparison.OrdinalIgnoreCase))
+            return;
+        if (assetPath.IndexOf(SPRITES_FOLDER, System.StringComparison.OrdinalIgnoreCase) < 0)
             return;
         importer.textureType = TextureImporterType.Sprite;
         importer.spriteImportMode = SpriteImportMode.Multiple;

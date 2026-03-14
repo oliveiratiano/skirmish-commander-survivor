@@ -28,8 +28,12 @@ public class CameraController : MonoBehaviour
         _cam.orthographicSize = baseSize;
         _baseTargetSize = baseSize;
         _scrollOffset = 0f;
+        _cam.clearFlags = CameraClearFlags.SolidColor;
         _cam.backgroundColor = GameConstants.ARENA_COLOR;
         transform.rotation = Quaternion.Euler(GameConstants.ISOMETRIC_CAMERA_ANGLE, 0f, 0f);
+        // Wide near/far so the arena floor is never clipped when the camera moves to the borders.
+        _cam.nearClipPlane = 0.01f;
+        _cam.farClipPlane = 5000f;
     }
 
     void Update()
