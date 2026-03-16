@@ -91,6 +91,32 @@ If you synced the repo but the `Assets/` folder is empty or missing textures, sc
    ```  
    Avoid `--depth`, `--filter`, or sparse checkout so all assets are fetched.
 
+### Unity Hub: nothing happens when adding project
+
+If you select the project folder in Unity Hub and nothing happens (project is not added):
+
+1. **Verify the folder is a valid Unity project** – The folder you select must contain `Assets/`, `ProjectSettings/`, and `Packages/` at the same level. Select the *root* folder (e.g. `skirmish-commander-survivor`), not a subfolder.
+
+2. **Check the clone is complete** – If `ProjectSettings/` or `Packages/` is empty/missing, Unity won't recognize it. Run:
+   ```bash
+   dir ProjectSettings\ProjectVersion.txt
+   dir Packages\manifest.json
+   dir Assets\_Project
+   ```
+   All should exist. If not, fix the clone first (see "Assets missing" above), then try again.
+
+3. **Unity version** – The project requires **Unity 6 (6000.3.11f1)**. Install it in Unity Hub via **Installs > Install Editor**. Hub may ignore projects whose version is not installed.
+
+4. **Path requirements** (Windows):
+   - Use a short path (e.g. `C:\Projects\skirmish-commander-survivor`)
+   - Avoid paths over 260 characters
+   - Avoid special characters, spaces, or non-ASCII letters
+   - Don't place the project inside `Program Files`, OneDrive sync folder, or a network drive
+
+5. **Use "Add project from disk"** – In Unity Hub, click the dropdown next to **Add**, choose **Add project from disk**, then select the project root folder.
+
+6. **Permissions & antivirus** – Run Unity Hub as administrator, or temporarily disable antivirus. Ensure the project folder is readable (not read-only).
+
 ## Documentation
 
 | Document | Description |
