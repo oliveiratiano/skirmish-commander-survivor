@@ -281,3 +281,23 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 | Status |
 |--------|
 | [ ] Not started |
+
+---
+
+## Feature: Kite Command
+
+**Goal:** Add a fourth command (Kite) so allied units use hit-and-run tactics: keep distance from enemies, shoot only when at optimal range (between min and max), and move toward Commander when no enemy is in range.
+
+**Design decisions (locked):**
+- **Shoot band:** Single constant `KITE_MIN_SHOOT_DISTANCE` in `GameConstants` (e.g. 2.5f). Unit shoots only when `KITE_MIN_SHOOT_DISTANCE <= dist <= data.range`. Below min, unit retreats.
+- **Retreat:** Move away from nearest enemy when too close (direction `(myPos - enemyPos).normalized`).
+- **Input:** Left Arrow.
+- **Idle (no enemy in range):** Move toward Commander at 0.85 urgency (Form Up style).
+- **Approach:** When enemy is beyond `data.range`, move toward enemy until in shoot band.
+- Relay, attention filter, and visual feedback parity with other commands.
+
+**Slices:** To be broken down when starting (e.g. Slice 1: Add Kite enum, input, HandleKite skeleton; Slice 2: Distance bands — retreat when too close, shoot when in band, approach when too far; Slice 3: Visual feedback icon, relay, attention filter).
+
+| Status |
+|--------|
+| [ ] Not started |
