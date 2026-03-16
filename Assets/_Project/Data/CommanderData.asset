@@ -101,6 +101,7 @@ MonoBehaviour:
   cooldown: 0.8
   burstCount: 1
   burstInterval: 0
+  sprayArcDegrees: 0
   projectileSpeed: 18
   projectileLifetime: 1.5
   projectileColor: {r: 0.4, g: 0.8, b: 1, a: 1}

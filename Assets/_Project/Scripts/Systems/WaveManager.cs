@@ -3,9 +3,13 @@ using UnityEngine;
 public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance { get; private set; }
+    public static GameObject ActiveBoss { get; private set; }
 
     [Header("Wave Config")]
     public UnitData enemyData;
+    public UnitData bossData;
+    [Tooltip("Escort swarm bugs that form up around the boss. Fallback to enemyData with 30% speed if null.")]
+    public UnitData escortData;
     public int totalEnemies = 100;
     public float baseSpawnInterval = 1.5f;
     public float minSpawnInterval = 0.2f;
@@ -18,13 +22,18 @@ public class WaveManager : MonoBehaviour
     bool _active;
 
     static GameObject _enemyPrefab;
+    static GameObject _bossPrefab;
+    bool _bossSpawned;
+    bool _bossKilled;
+    const int ESCORT_COUNT = 10;
+    int _escortKilled;
 
     public int SpawnedCount => _spawnedCount;
     public int KilledCount => _killedCount;
     public int RemainingToSpawn => totalEnemies - _spawnedCount;
-    public int AliveCount => _spawnedCount - _killedCount;
+    public int AliveCount => _spawnedCount - _killedCount + (_bossSpawned && !_bossKilled ? 1 : 0) + (ESCORT_COUNT - _escortKilled);
     public bool AllSpawned => _spawnedCount >= totalEnemies;
-    public bool AllDead => AllSpawned && _killedCount >= totalEnemies;
+    public bool AllDead => AllSpawned && _killedCount >= totalEnemies && (!_bossSpawned || _bossKilled) && _escortKilled >= ESCORT_COUNT;
     public float CurrentSpawnRate => _active && _currentSpawnInterval > 0 ? 1f / _currentSpawnInterval : 0f;
 
     void Awake()
@@ -43,12 +52,16 @@ public class WaveManager : MonoBehaviour
     {
         _spawnedCount = 0;
         _killedCount = 0;
+        _bossSpawned = false;
+        _bossKilled = false;
+        _escortKilled = 0;
         _elapsedTime = 0f;
         _currentSpawnInterval = baseSpawnInterval;
         _spawnTimer = 0f;
         _active = true;
 
         EnsureEnemyPrefab();
+        if (bossData != null) EnsureBossPrefab();
     }
 
     public void StopWave()
@@ -59,19 +72,27 @@ public class WaveManager : MonoBehaviour
     void Update()
     {
         if (!_active) return;
-        if (AllSpawned) return;
 
         _elapsedTime += Time.deltaTime;
 
-        int intervals = Mathf.FloorToInt(_elapsedTime / GameConstants.SPAWN_RATE_INCREASE_INTERVAL);
-        _currentSpawnInterval = Mathf.Max(minSpawnInterval,
-            baseSpawnInterval - intervals * 0.25f);
-
-        _spawnTimer -= Time.deltaTime;
-        if (_spawnTimer <= 0f)
+        if (!AllSpawned)
         {
-            SpawnEnemy();
-            _spawnTimer = _currentSpawnInterval;
+            int intervals = Mathf.FloorToInt(_elapsedTime / GameConstants.SPAWN_RATE_INCREASE_INTERVAL);
+            _currentSpawnInterval = Mathf.Max(minSpawnInterval,
+                baseSpawnInterval - intervals * 0.25f);
+
+            _spawnTimer -= Time.deltaTime;
+            if (_spawnTimer <= 0f)
+            {
+                SpawnEnemy();
+                _spawnTimer = _currentSpawnInterval;
+            }
+        }
+
+        if (bossData != null && _elapsedTime >= GameConstants.BOSS_SPAWN_TIME && !_bossSpawned)
+        {
+            SpawnBoss();
+            _bossSpawned = true;
         }
 
         UpdateDebugOverlay();
@@ -123,6 +144,7 @@ public class WaveManager : MonoBehaviour
                 ai.Initialize(enemyData, isPlayer: false);
             else if (!UnitAIController.AllEnemyUnits.Contains(ai))
                 UnitAIController.AllEnemyUnits.Add(ai);
+            ai.SetFormUpTarget(null);
         }
 
         var attack = go.GetComponent<RangedAttackComponent>();
@@ -239,6 +261,222 @@ public class WaveManager : MonoBehaviour
         go.AddComponent<IsometricSorting>();
 
         return go;
+    }
+
+    void EnsureBossPrefab()
+    {
+        if (_bossPrefab != null || bossData == null) return;
+
+        bool hasSprites = (bossData.spritesUp != null && bossData.spritesUp.Length > 0) || (bossData.spritesRight != null && bossData.spritesRight.Length > 0) || (bossData.spritesDown != null && bossData.spritesDown.Length > 0);
+        if (hasSprites)
+            _bossPrefab = CreateBossPrefabWithSprites();
+        else
+        {
+            _bossPrefab = GameManager.CreatePrimitive("BossPrefab", Vector3.zero, bossData.unitColor, 0.85f);
+            _bossPrefab.transform.localScale = Vector3.one * GameConstants.BOSS_SPRITE_SCALE;
+            var move = _bossPrefab.AddComponent<MovementComponent>();
+            move.moveSpeed = bossData.moveSpeed;
+            _bossPrefab.AddComponent<HealthComponent>();
+            _bossPrefab.AddComponent<UnitAIController>();
+            var attack = _bossPrefab.AddComponent<RangedAttackComponent>();
+            attack.data = bossData;
+            attack.isPlayerUnit = false;
+            _bossPrefab.AddComponent<HitFlashComponent>();
+            _bossPrefab.AddComponent<ProceduralAnimator>();
+            _bossPrefab.AddComponent<IsometricSorting>();
+        }
+
+        _bossPrefab.SetActive(false);
+
+        if (ObjectPool.Instance != null)
+            ObjectPool.Instance.Prewarm("Boss", _bossPrefab, 5);
+    }
+
+    GameObject CreateBossPrefabWithSprites()
+    {
+        var go = new GameObject("BossPrefab");
+        go.transform.position = Vector3.zero;
+        go.transform.localScale = Vector3.one * GameConstants.BOSS_SPRITE_SCALE;
+
+        var sr = go.AddComponent<SpriteRenderer>();
+        Sprite[] first = bossData.spritesDown ?? bossData.spritesUp ?? bossData.spritesRight;
+        int idleIdx = GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX;
+        sr.sprite = first != null && first.Length > idleIdx ? first[idleIdx] : (first != null && first.Length > 0 ? first[0] : null);
+        sr.material = new Material(Shader.Find("Sprites/Default"));
+        sr.material.color = Color.white;
+
+        var move = go.AddComponent<MovementComponent>();
+        move.moveSpeed = bossData.moveSpeed;
+        go.AddComponent<HealthComponent>();
+        go.AddComponent<UnitAIController>();
+        var attack = go.AddComponent<RangedAttackComponent>();
+        attack.data = bossData;
+        attack.isPlayerUnit = false;
+        go.AddComponent<HitFlashComponent>();
+        go.AddComponent<ProceduralAnimator>();
+        var anim = go.AddComponent<SpriteSheetAnimator>();
+        anim.SetDirectionalSprites(bossData.spritesUp, bossData.spritesRight, bossData.spritesDown);
+        go.AddComponent<IsometricSorting>();
+
+        return go;
+    }
+
+    void SpawnBoss()
+    {
+        if (bossData == null) return;
+
+        Vector3 pos = GetSpawnPosition();
+
+        GameObject go = null;
+        if (ObjectPool.Instance != null)
+            go = ObjectPool.Instance.Get("Boss", pos);
+
+        if (go == null)
+        {
+            EnsureBossPrefab();
+            go = Object.Instantiate(_bossPrefab);
+            go.transform.position = pos;
+            go.SetActive(true);
+        }
+
+        ResetBoss(go, pos);
+        SpawnBossEscorts(go);
+    }
+
+    void ResetBoss(GameObject go, Vector3 pos)
+    {
+        ActiveBoss = go;
+        go.transform.position = pos;
+        go.name = "SwarmBugBoss";
+
+        var health = go.GetComponent<HealthComponent>();
+        if (health != null)
+        {
+            health.Initialize(bossData.maxHP);
+            health.OnDied -= OnBossDied;
+            health.OnDied += OnBossDied;
+        }
+
+        var move = go.GetComponent<MovementComponent>();
+        if (move != null)
+            move.moveSpeed = bossData.moveSpeed;
+
+        var ai = go.GetComponent<UnitAIController>();
+        if (ai != null)
+        {
+            if (ai.data == null)
+                ai.Initialize(bossData, isPlayer: false);
+            else if (!UnitAIController.AllEnemyUnits.Contains(ai))
+                UnitAIController.AllEnemyUnits.Add(ai);
+        }
+
+        var attack = go.GetComponent<RangedAttackComponent>();
+        if (attack != null)
+        {
+            attack.data = bossData;
+            attack.isPlayerUnit = false;
+            attack.forceCommanderTarget = true;
+        }
+
+        var flash = go.GetComponent<HitFlashComponent>();
+        if (flash != null)
+            flash.ResetFlash();
+
+        var anim = go.GetComponent<ProceduralAnimator>();
+        if (anim != null)
+            anim.ResetAnimation();
+
+        var spriteAnim = go.GetComponent<SpriteSheetAnimator>();
+        if (spriteAnim != null)
+            spriteAnim.SetDirectionalSprites(bossData.spritesUp, bossData.spritesRight, bossData.spritesDown);
+    }
+
+    void OnBossDied()
+    {
+        ActiveBoss = null;
+        _bossKilled = true;
+        _killedCount++;
+    }
+
+    void SpawnBossEscorts(GameObject boss)
+    {
+        UnitData escort = escortData != null ? escortData : enemyData;
+        float speedOverride = escortData == null ? enemyData.moveSpeed * 1.3f : 0f; // 30% faster when using fallback
+        if (escort == null) return;
+
+        Vector3 bossPos = boss.transform.position;
+        for (int i = 0; i < ESCORT_COUNT; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * 3f;
+            Vector3 pos = bossPos + new Vector3(offset.x, offset.y, 0f);
+
+            GameObject go = null;
+            if (ObjectPool.Instance != null)
+                go = ObjectPool.Instance.Get("Enemy", pos);
+
+            if (go == null)
+            {
+                EnsureEnemyPrefab();
+                go = Object.Instantiate(_enemyPrefab);
+                go.transform.position = pos;
+                go.SetActive(true);
+            }
+
+            ResetBossEscort(go, pos, escort, boss.transform, speedOverride);
+        }
+    }
+
+    void ResetBossEscort(GameObject go, Vector3 pos, UnitData escort, Transform bossTransform, float speedOverride = -1f)
+    {
+        go.transform.position = pos;
+        go.name = "SwarmBugEscort";
+
+        var health = go.GetComponent<HealthComponent>();
+        if (health != null)
+        {
+            health.Initialize(escort.maxHP);
+            health.OnDied -= OnEnemyDied;
+            health.OnDied -= OnBossEscortDied;
+            health.OnDied += OnBossEscortDied;
+        }
+
+        var move = go.GetComponent<MovementComponent>();
+        if (move != null)
+            move.moveSpeed = speedOverride > 0 ? speedOverride : escort.moveSpeed;
+
+        var ai = go.GetComponent<UnitAIController>();
+        if (ai != null)
+        {
+            if (ai.data == null)
+                ai.Initialize(escort, isPlayer: false);
+            else if (!UnitAIController.AllEnemyUnits.Contains(ai))
+                UnitAIController.AllEnemyUnits.Add(ai);
+            ai.SetFormUpTarget(bossTransform);
+        }
+
+        var attack = go.GetComponent<RangedAttackComponent>();
+        if (attack != null)
+        {
+            attack.data = escort;
+            attack.isPlayerUnit = false;
+        }
+
+        var flash = go.GetComponent<HitFlashComponent>();
+        if (flash != null)
+            flash.ResetFlash();
+
+        var anim = go.GetComponent<ProceduralAnimator>();
+        if (anim != null)
+            anim.ResetAnimation();
+
+        var spriteAnim = go.GetComponent<SpriteSheetAnimator>();
+        if (spriteAnim != null)
+            spriteAnim.SetDirectionalSprites(escort.spritesUp, escort.spritesRight, escort.spritesDown);
+    }
+
+    void OnBossEscortDied()
+    {
+        _escortKilled++;
     }
 
     void UpdateDebugOverlay()

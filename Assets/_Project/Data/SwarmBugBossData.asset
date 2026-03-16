@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 38dfb6626c9d41a45b918917630198c5, type: 3}
-  m_Name: SwarmBugData
+  m_Name: SwarmBugBossData
   m_EditorClassIdentifier: Assembly-CSharp::UnitData
-  unitName: Swarm Bug
-  unitColor: {r: 0.7, g: 0.2, b: 0.1, a: 1}
+  unitName: Swarm Bug Boss
+  unitColor: {r: 0.8, g: 0.15, b: 0.05, a: 1}
   spritesUp:
   - {fileID: -2754054880299961812, guid: 9027dec9693793c49a08e9f4498b91fc, type: 3}
   - {fileID: -4191448923090977451, guid: 9027dec9693793c49a08e9f4498b91fc, type: 3}
@@ -93,15 +93,15 @@ MonoBehaviour:
   - {fileID: 1101975161896335623, guid: a9d3de95b8208424c909f0f74ff308ea, type: 3}
   - {fileID: -1201527008894759859, guid: a9d3de95b8208424c909f0f74ff308ea, type: 3}
   cost: 0
-  maxHP: 20
-  moveSpeed: 4
-  damage: 7
-  range: 3
+  maxHP: 180
+  moveSpeed: 5
+  damage: 15
+  range: 5
   accuracySpreadDegrees: 15
-  cooldown: 1.2
-  burstCount: 1
+  cooldown: 1.5
+  burstCount: 4
   burstInterval: 0
-  sprayArcDegrees: 0
-  projectileSpeed: 10
-  projectileLifetime: 1
-  projectileColor: {r: 0.5, g: 1, b: 0.1, a: 1}
+  sprayArcDegrees: 40
+  projectileSpeed: 12
+  projectileLifetime: 1.5
+  projectileColor: {r: 0.6, g: 1, b: 0.15, a: 1}

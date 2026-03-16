@@ -7,6 +7,12 @@ public static class GameConstants
     public const float ARENA_SAFE_HALF_SIZE = ARENA_HALF_SIZE - ARENA_DANGER_ZONE_WIDTH;
     public const float DANGER_ZONE_DPS = 15f;
 
+    public const float BOSS_SPAWN_TIME = 3f; // Swarm Bug Boss spawns at 3s
+    public const float BOSS_MOVE_CHANGE_INTERVAL_MIN = 0.4f;
+    public const float BOSS_MOVE_CHANGE_INTERVAL_MAX = 0.8f;
+    public const float BOSS_APPROACH_WEIGHT = 0.6f; // 60% approach, 40% strafe
+    public const float BOSS_ESCORT_RADIUS = 4f; // Perimeter around boss; escorts stop when within range
+
     public const int DRAFT_BUDGET = 100;
     public const float WAVE_DURATION = 180f;
     public const float SPAWN_RATE_INCREASE_INTERVAL = 30f;
@@ -51,6 +57,7 @@ public static class GameConstants
     public const float COMMANDER_SPRITE_SCALE = 0.56f; // ~50% larger again (was 0.375)
     public const float UNIT_SPRITE_SCALE = 0.3f;   // +50% (was 0.2f)
     public const float ENEMY_SPRITE_SCALE = 0.2625f; // +50% (was 0.175f)
+    public const float BOSS_SPRITE_SCALE = 0.55f;    // ~2x Swarm Bug
     public const float SPRITE_SHEET_FRAMES_PER_SECOND = 10f;
     public const float SHOOT_ANIM_DURATION = 0.2f;
 

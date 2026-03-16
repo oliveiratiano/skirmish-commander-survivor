@@ -29,6 +29,11 @@ public class UnitAIController : MonoBehaviour
     const float SHOOT_PREP_DURATION = 0.5f;
     ShootPrepPhase _shootPrepPhase = ShootPrepPhase.OutOfRange;
 
+    float _bossMoveTimer;
+    Vector3 _bossMoveDir;
+
+    Transform _formUpTarget;
+
     bool _movementLocked;
     CommandState _currentCommand = CommandState.FormUp;
     CommandState _effectiveCommand = CommandState.FormUp;
@@ -89,6 +94,11 @@ public class UnitAIController : MonoBehaviour
             _promptedIndicator = go.transform;
             _promptedIndicator.gameObject.SetActive(false);
         }
+    }
+
+    public void SetFormUpTarget(Transform target)
+    {
+        _formUpTarget = target;
     }
 
     public void ReceiveCommand(CommandState state, bool withPropagation = false)
@@ -174,8 +184,18 @@ public class UnitAIController : MonoBehaviour
                 _promptedIndicator.gameObject.SetActive(show);
             }
         }
+        else if (data != null && !string.IsNullOrEmpty(data.unitName) && data.unitName.Contains("Boss"))
+        {
+            UpdateBossUnit();
+        }
+        else if (_formUpTarget != null && _formUpTarget.gameObject.activeInHierarchy)
+        {
+            UpdateEscortUnit();
+        }
         else
+        {
             UpdateEnemyUnit();
+        }
 
         if (!_movementLocked)
             ApplyFriendlyAvoidance();
@@ -293,6 +313,106 @@ public class UnitAIController : MonoBehaviour
         MoveTowardCommander(1f);
     }
 
+    void UpdateBossUnit()
+    {
+        if (_attack != null)
+            _attack.enabled = true;
+
+        if (CommanderController.Instance == null)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            _movement.Stop();
+            return;
+        }
+
+        var cmdHealth = CommanderController.Instance.GetComponent<HealthComponent>();
+        if (cmdHealth != null && cmdHealth.IsDead)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            _movement.Stop();
+            return;
+        }
+
+        Vector3 commanderPos = CommanderController.Instance.transform.position;
+        float dist = (commanderPos - transform.position).magnitude;
+
+        if (data != null && dist <= data.range)
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
+
+        ClearShootPrepState();
+        _movementLocked = false;
+
+        _bossMoveTimer -= Time.deltaTime;
+        if (_bossMoveTimer <= 0f)
+        {
+            Vector3 toCommander = (commanderPos - transform.position).normalized;
+            float r = Random.value;
+            if (r < GameConstants.BOSS_APPROACH_WEIGHT)
+            {
+                _bossMoveDir = toCommander;
+            }
+            else if (r < 0.75f)
+            {
+                _bossMoveDir = new Vector3(-toCommander.y, toCommander.x, 0f).normalized; // strafe left
+            }
+            else if (r < 0.9f)
+            {
+                _bossMoveDir = new Vector3(toCommander.y, -toCommander.x, 0f).normalized; // strafe right
+            }
+            else
+            {
+                _bossMoveDir = -toCommander; // short retreat
+            }
+            _bossMoveTimer = Random.Range(GameConstants.BOSS_MOVE_CHANGE_INTERVAL_MIN, GameConstants.BOSS_MOVE_CHANGE_INTERVAL_MAX);
+        }
+
+        _movement.Move(_bossMoveDir);
+    }
+
+    void UpdateEscortUnit()
+    {
+        if (_attack != null)
+            _attack.enabled = true;
+
+        if (_formUpTarget == null || !_formUpTarget.gameObject.activeInHierarchy)
+        {
+            _formUpTarget = null;
+            UpdateEnemyUnit();
+            return;
+        }
+
+        bool playerInRange = false;
+        if (_attack != null && data != null)
+        {
+            Transform nearest = FindNearestAnyUnit();
+            if (nearest != null)
+            {
+                float dist = (nearest.position - transform.position).magnitude;
+                playerInRange = dist <= data.range;
+            }
+        }
+
+        if (playerInRange)
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+        }
+        else
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            MoveTowardTarget(_formUpTarget, GameConstants.BOSS_ESCORT_RADIUS, 0.85f);
+        }
+    }
+
     void UpdateEnemyUnit()
     {
         if (_attack != null)
@@ -401,6 +521,17 @@ public class UnitAIController : MonoBehaviour
         }
     }
 
+    void MoveTowardTarget(Transform target, float perimeterRadius, float urgency)
+    {
+        if (target == null) return;
+
+        Vector3 toTarget = target.position - transform.position;
+        if (toTarget.magnitude > perimeterRadius)
+            _movement.Move(toTarget.normalized * urgency);
+        else
+            _movement.Stop();
+    }
+
     Transform FindNearest(System.Collections.Generic.List<UnitAIController> list)
     {
         Transform best = null;
@@ -483,7 +614,8 @@ public class UnitAIController : MonoBehaviour
         if (!IsPlayerUnit && ObjectPool.Instance != null)
         {
             AllEnemyUnits.Remove(this);
-            ObjectPool.Instance.Return("Enemy", gameObject);
+            string poolKey = (data != null && data.unitName != null && data.unitName.Contains("Boss")) ? "Boss" : "Enemy";
+            ObjectPool.Instance.Return(poolKey, gameObject);
         }
         else
         {

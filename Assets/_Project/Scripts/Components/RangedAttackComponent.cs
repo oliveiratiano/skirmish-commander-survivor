@@ -4,6 +4,8 @@ public class RangedAttackComponent : MonoBehaviour
 {
     public UnitData data;
     public bool isPlayerUnit;
+    /// <summary>When true, always target Commander (enemies only).</summary>
+    public bool forceCommanderTarget;
 
     float _cooldownTimer;
     int _burstRemaining;
@@ -50,7 +52,13 @@ public class RangedAttackComponent : MonoBehaviour
         float dist = (target.position - transform.position).magnitude;
         if (dist > data.range) return;
 
-        if (data.burstCount > 1)
+        bool useSpray = data.sprayArcDegrees > 0f && data.burstCount > 1;
+        if (useSpray)
+        {
+            FireSpray(data.burstCount, data.sprayArcDegrees);
+            _cooldownTimer = data.cooldown;
+        }
+        else if (data.burstCount > 1)
         {
             _isBursting = true;
             _burstRemaining = data.burstCount;
@@ -73,6 +81,24 @@ public class RangedAttackComponent : MonoBehaviour
         Vector3 direction = Quaternion.Euler(0f, 0f, deviation) * toTarget;
 
         SpawnProjectile(direction);
+    }
+
+    void FireSpray(int count, float arcDegrees)
+    {
+        Transform target = FindTarget();
+        if (target == null) return;
+
+        Vector3 toTarget = (target.position - transform.position).normalized;
+        float halfArc = arcDegrees * 0.5f;
+        float step = count > 1 ? arcDegrees / (count - 1) : 0f;
+
+        for (int i = 0; i < count; i++)
+        {
+            float angle = count > 1 ? -halfArc + step * i : 0f;
+            float deviation = UnityEngine.Random.Range(-data.accuracySpreadDegrees, data.accuracySpreadDegrees);
+            Vector3 direction = Quaternion.Euler(0f, 0f, angle + deviation) * toTarget;
+            SpawnProjectile(direction);
+        }
     }
 
     void SpawnProjectile(Vector3 direction)
@@ -109,8 +135,14 @@ public class RangedAttackComponent : MonoBehaviour
     {
         if (isPlayerUnit)
             return FindNearestIn(UnitAIController.AllEnemyUnits);
-        else
-            return FindNearestIncludingCommander();
+        if (forceCommanderTarget && CommanderController.Instance != null)
+        {
+            var h = CommanderController.Instance.GetComponent<HealthComponent>();
+            if (h != null && !h.IsDead)
+                return CommanderController.Instance.transform;
+            return null;
+        }
+        return FindNearestIncludingCommander();
     }
 
     Transform FindNearestIn(System.Collections.Generic.List<UnitAIController> list)

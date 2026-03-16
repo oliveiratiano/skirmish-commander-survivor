@@ -31,6 +31,8 @@ public class UnitData : ScriptableObject
     public float cooldown = 1f;
     public int burstCount = 1;
     public float burstInterval = 0.1f;
+    [Tooltip("When > 0 and burstCount > 1, fire all bullets in a spray arc (total degrees).")]
+    public float sprayArcDegrees;
 
     [Header("Projectile")]
     public float projectileSpeed = 15f;

@@ -106,6 +106,46 @@ public static class ProjectSetup
             projectileColor = new Color(0.5f, 1f, 0.1f)
         });
 
+        CreateUnitData("SwarmBugEscortData", new UnitDataConfig
+        {
+            unitName = "Swarm Bug Escort",
+            color = new Color(0.7f, 0.2f, 0.1f),
+            cost = 0,
+            maxHP = 20f,
+            moveSpeed = 5.2f, // 30% faster than Swarm Bug (4 * 1.3)
+            damage = 7f,
+            range = 3f,
+            accuracySpread = 15f,
+            cooldown = 1.2f,
+            burstCount = 1,
+            burstInterval = 0f,
+            projectileSpeed = 10f,
+            projectileLifetime = 1f,
+            projectileColor = new Color(0.5f, 1f, 0.1f)
+        });
+
+        CreateUnitData("SwarmBugBossData", new UnitDataConfig
+        {
+            unitName = "Swarm Bug Boss",
+            color = new Color(0.8f, 0.15f, 0.05f),
+            cost = 0,
+            maxHP = 180f,
+            moveSpeed = 5f,
+            damage = 15f,
+            range = 5f,
+            accuracySpread = 15f,
+            cooldown = 1.5f,
+            burstCount = 4,
+            burstInterval = 0f,
+            sprayArcDegrees = 40f,
+            projectileSpeed = 12f,
+            projectileLifetime = 1.5f,
+            projectileColor = new Color(0.6f, 1f, 0.15f)
+        });
+
+        CopySwarmBugSpritesToBoss();
+        CopySwarmBugSpritesToEscort();
+
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
         Debug.Log("[ProjectSetup] All UnitData assets created in " + DATA_PATH);
@@ -124,6 +164,8 @@ public static class ProjectSetup
         var machineGunner = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/MachineGunnerData.asset");
         var sharpshooter = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SharpshooterData.asset");
         var swarmBug = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugData.asset");
+        var swarmBugBoss = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugBossData.asset");
+        var swarmBugEscort = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugEscortData.asset");
 
         if (commanderData == null || swarmBug == null)
         {
@@ -162,6 +204,8 @@ public static class ProjectSetup
         GameObject waveGO = CreateEmpty("WaveManager");
         var wm = waveGO.AddComponent<WaveManager>();
         wm.enemyData = swarmBug;
+        wm.bossData = swarmBugBoss;
+        wm.escortData = swarmBugEscort;
         wm.totalEnemies = 100;
         wm.baseSpawnInterval = 1.5f;
         wm.minSpawnInterval = 0.2f;
@@ -240,6 +284,7 @@ public static class ProjectSetup
         public float cooldown;
         public int burstCount;
         public float burstInterval;
+        public float sprayArcDegrees;
         public float projectileSpeed, projectileLifetime;
         public Color projectileColor;
     }
@@ -274,6 +319,7 @@ public static class ProjectSetup
         asset.cooldown = cfg.cooldown;
         asset.burstCount = cfg.burstCount;
         asset.burstInterval = cfg.burstInterval;
+        asset.sprayArcDegrees = cfg.sprayArcDegrees;
         asset.projectileSpeed = cfg.projectileSpeed;
         asset.projectileLifetime = cfg.projectileLifetime;
         asset.projectileColor = cfg.projectileColor;
@@ -306,6 +352,32 @@ public static class ProjectSetup
         EnsureDirectory(ART_PATH);
         // Only Art/ is ensured. Do not create unit subfolders (Commander, CloseQuarters, etc.);
         // users place sprite sheets where they want under Art/ and the import script does not create directories.
+    }
+
+    static void CopySwarmBugSpritesToBoss()
+    {
+        var swarmBug = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugData.asset");
+        var boss = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugBossData.asset");
+        if (swarmBug == null || boss == null) return;
+        if (swarmBug.spritesUp == null && swarmBug.spritesRight == null && swarmBug.spritesDown == null) return;
+
+        boss.spritesUp = swarmBug.spritesUp;
+        boss.spritesRight = swarmBug.spritesRight;
+        boss.spritesDown = swarmBug.spritesDown;
+        EditorUtility.SetDirty(boss);
+    }
+
+    static void CopySwarmBugSpritesToEscort()
+    {
+        var swarmBug = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugData.asset");
+        var escort = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SwarmBugEscortData.asset");
+        if (swarmBug == null || escort == null) return;
+        if (swarmBug.spritesUp == null && swarmBug.spritesRight == null && swarmBug.spritesDown == null) return;
+
+        escort.spritesUp = swarmBug.spritesUp;
+        escort.spritesRight = swarmBug.spritesRight;
+        escort.spritesDown = swarmBug.spritesDown;
+        EditorUtility.SetDirty(escort);
     }
 
     const string DEFAULT_FLOOR_SETTINGS_PATH = "Assets/Resources/DefaultArenaFloorSettings.asset";
