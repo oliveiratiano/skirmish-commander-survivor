@@ -41,26 +41,8 @@ public class SpriteSheetAutoImport : AssetPostprocessor
             return;
         }
 
-        int cellW = GameConstants.SPRITE_SHEET_CELL_WIDTH;
-        int cellH = GameConstants.SPRITE_SHEET_CELL_HEIGHT;
         string baseName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
-
-        var sheet = new SpriteMetaData[GRID_COLS * GRID_ROWS];
-        for (int row = 0; row < GRID_ROWS; row++)
-        {
-            for (int col = 0; col < GRID_COLS; col++)
-            {
-                int i = row * GRID_COLS + col;
-                sheet[i] = new SpriteMetaData
-                {
-                    name = $"{baseName}_{i}",
-                    rect = new Rect(col * cellW, (GRID_ROWS - 1 - row) * cellH, cellW, cellH),
-                    alignment = (int)SpriteAlignment.Center,
-                    pivot = new Vector2(0.5f, 0.5f)
-                };
-            }
-        }
-
+        var sheet = BuildSpriteSheetMetaData(baseName);
         SetSpriteSheetViaSerializedObject(importer, sheet);
     }
 
@@ -117,10 +99,18 @@ public class SpriteSheetAutoImport : AssetPostprocessor
         importer.spriteImportMode = SpriteImportMode.Multiple;
         importer.spritePixelsPerUnit = GameConstants.SPRITE_SHEET_PIXELS_PER_UNIT;
 
+        string baseName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
+        var sheet = BuildSpriteSheetMetaData(baseName);
+        SetSpriteSheetViaSerializedObject(importer, sheet);
+        EditorUtility.SetDirty(importer);
+        importer.SaveAndReimport();
+        return true;
+    }
+
+    static SpriteMetaData[] BuildSpriteSheetMetaData(string baseName)
+    {
         int cellW = GameConstants.SPRITE_SHEET_CELL_WIDTH;
         int cellH = GameConstants.SPRITE_SHEET_CELL_HEIGHT;
-        string baseName = System.IO.Path.GetFileNameWithoutExtension(assetPath);
-
         var sheet = new SpriteMetaData[GRID_COLS * GRID_ROWS];
         for (int row = 0; row < GRID_ROWS; row++)
         {
@@ -136,11 +126,7 @@ public class SpriteSheetAutoImport : AssetPostprocessor
                 };
             }
         }
-
-        SetSpriteSheetViaSerializedObject(importer, sheet);
-        EditorUtility.SetDirty(importer);
-        importer.SaveAndReimport();
-        return true;
+        return sheet;
     }
 
     static void SetSpriteSheetViaSerializedObject(TextureImporter importer, SpriteMetaData[] sheet)

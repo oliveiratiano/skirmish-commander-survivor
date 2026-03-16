@@ -14,6 +14,12 @@ public class ObjectPool : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     public void Prewarm(string key, GameObject prefab, int count)
     {
         if (!_pools.ContainsKey(key))

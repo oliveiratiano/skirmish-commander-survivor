@@ -37,6 +37,12 @@ public class GameFlowManager : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     public void StartBattle()
     {
         CurrentPhase = GamePhase.Battle;

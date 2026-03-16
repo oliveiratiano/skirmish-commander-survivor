@@ -22,6 +22,12 @@ public class DebugOverlay : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     void OnEnable() { SubscribeInput(); }
     void Start() { SubscribeInput(); }
 

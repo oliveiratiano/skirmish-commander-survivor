@@ -5,8 +5,11 @@ public class DefaultArenaFloorSettings : ScriptableObject
 {
     public const string RESOURCES_NAME = "DefaultArenaFloorSettings";
 
-    [Tooltip("Default floor texture name (loaded via Resources.Load). Empty = use GameConstants.ARENA_DEFAULT_FLOOR_TEXTURE_NAME.")]
+    [Tooltip("Default floor texture name (loaded via Resources.Load at runtime). Empty = use GameConstants.ARENA_DEFAULT_FLOOR_TEXTURE_NAME.")]
     public string defaultFloorTextureName = "";
+
+    [Tooltip("Asset path for editor restore (e.g. Assets/_Project/Art/...). Enables persistence when texture is outside Resources.")]
+    public string defaultFloorTexturePath = "";
 
     [Tooltip("Default tiling (repeats per arena side). Updated when you change tiling in ArenaSetup inspector. Min 0.1.")]
     [Min(0.1f)]

@@ -4,6 +4,19 @@ public class BattleHUD : MonoBehaviour
 {
     GUIStyle _timerStyle;
     GUIStyle _infoStyle;
+    HealthComponent _commanderHealth;
+
+    void OnEnable()
+    {
+        RefreshCommanderHealthCache();
+    }
+
+    void RefreshCommanderHealthCache()
+    {
+        _commanderHealth = CommanderController.Instance != null
+            ? CommanderController.Instance.GetComponent<HealthComponent>()
+            : null;
+    }
 
     void OnGUI()
     {
@@ -39,12 +52,15 @@ public class BattleHUD : MonoBehaviour
         }
 
         // Commander HP
-        if (CommanderController.Instance != null)
+        if (CommanderController.Instance == null)
+            _commanderHealth = null;
+        else
         {
-            var health = CommanderController.Instance.GetComponent<HealthComponent>();
-            if (health != null)
+            if (_commanderHealth == null)
+                RefreshCommanderHealthCache();
+            if (_commanderHealth != null)
             {
-                string hpText = $"HP: {Mathf.CeilToInt(health.CurrentHP)} / {health.maxHP}";
+                string hpText = $"HP: {Mathf.CeilToInt(_commanderHealth.CurrentHP)} / {_commanderHealth.maxHP}";
                 GUI.Label(new Rect(leftMargin, y, 200f, 25f), hpText, _infoStyle);
                 y += lineHeight;
             }

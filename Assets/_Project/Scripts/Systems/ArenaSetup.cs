@@ -41,8 +41,10 @@ public class ArenaSetup : MonoBehaviour
 
         Texture2D tex = floorTexture != null ? floorTexture : GetDefaultFloorTexture();
         bool fromInspector = floorTexture != null;
+#if UNITY_EDITOR
         if (!fromInspector)
             Debug.Log("[ArenaSetup] Floor Texture unset on '" + gameObject.name + "'. Using default from Resources: " + (tex != null ? tex.name : "none") + ".");
+#endif
 
         Shader fsShader = Shader.Find("Unlit/Floor Fullscreen");
         if (fsShader == null)
@@ -75,7 +77,9 @@ public class ArenaSetup : MonoBehaviour
             mat.SetFloat("_FloorSize", GameConstants.ARENA_HALF_SIZE * 2f);
             mat.SetFloat("_Tiling", tiling);
             mat.SetFloat("_TilingVAspect", GameConstants.ARENA_FLOOR_TILING_V_ASPECT);
+#if UNITY_EDITOR
             Debug.Log("[ArenaSetup] Fullscreen floor on '" + gameObject.name + "': texture=" + tex.name + " (" + (fromInspector ? "Inspector" : "Resources") + "), tiling=" + tiling + ".");
+#endif
         }
         else
         {

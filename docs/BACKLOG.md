@@ -136,6 +136,80 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 ---
 
+## Feature: Code Housekeeping
+
+**Goal:** Tidy the codebase, remove duplication, and apply good-practice improvements. Each slice is independent and testable.
+
+### Slice 1: SpriteSheetAutoImport DRY
+
+**What:** Extract the duplicated 5×5 sprite-sheet grid construction into a shared helper in SpriteSheetAutoImport. OnPreprocessTexture and ApplyGridSliceAndReimport both call it.
+
+**Files:** `Assets/_Project/Scripts/Editor/SpriteSheetAutoImport.cs`
+
+**Test:** Reimport a 1280×1280 PNG under Art/Sprites/; menu "Slice Selected Texture 5x5" on same PNG. Behavior unchanged (same slices). Play scene; sprites still animate correctly.
+
+| Status |
+|--------|
+| [x] Done |
+
+---
+
+### Slice 2: Singleton OnDestroy cleanup
+
+**What:** Add OnDestroy to each singleton that sets `Instance = null` when `Instance == this`. Singletons: GameManager, CommanderController, InputHandler, GameFlowManager, WaveManager, ObjectPool, UnitSpawner, CommandSystem, DebugOverlay.
+
+**Files:** Those nine script files under Scripts/.
+
+**Test:** Play scene; start battle; exit play mode (or scene unload if applicable). No errors. Enter play again; game runs normally.
+
+| Status |
+|--------|
+| [x] Done |
+
+---
+
+### Slice 3: BattleHUD cache Commander HealthComponent
+
+**What:** Cache Commander's HealthComponent (e.g. when Commander spawns or in Start/OnEnable when Instance exists). Use cache in OnGUI instead of GetComponent each frame.
+
+**Files:** `Assets/_Project/Scripts/UI/BattleHUD.cs`
+
+**Test:** Play; enter battle. Commander HP displays correctly and updates when damaged. No regression.
+
+| Status |
+|--------|
+| [x] Done |
+
+---
+
+### Slice 4: ArenaSetup runtime Debug.Log
+
+**What:** Wrap the two Debug.Log calls (lines 45 and 78) in `#if UNITY_EDITOR` so they only run in the editor, or remove them. Prefer wrap so setup remains traceable in editor.
+
+**Files:** `Assets/_Project/Scripts/Systems/ArenaSetup.cs`
+
+**Test:** Play scene; floor renders. In editor, Console shows floor log when applicable. In build (if you check), no extra log.
+
+| Status |
+|--------|
+| [x] Done |
+
+---
+
+### Slice 5: ShoutGeometry folder move
+
+**What:** Move ShoutGeometry.cs from Scripts/ to Scripts/Systems/ (or Scripts/Data/). Update namespace if any; fix any references. Unity will preserve references by GUID; C# references are by type name so no code changes elsewhere if the class stays `ShoutGeometry`.
+
+**Files:** Move `Assets/_Project/Scripts/ShoutGeometry.cs` to `Assets/_Project/Scripts/Systems/ShoutGeometry.cs` (or Data/). Confirm no broken references.
+
+**Test:** Play scene; issue directional commands. Shout oval and command behavior unchanged (ShoutGeometry.IsInShoutOval used by CommandSystem).
+
+| Status |
+|--------|
+| [x] Done |
+
+---
+
 ## Planned Features (Recommended order: 1 → 2 → 3 → 4 → 5)
 
 ---

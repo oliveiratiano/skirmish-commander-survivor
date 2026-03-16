@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: DefaultArenaFloorSettings
   m_EditorClassIdentifier: Assembly-CSharp::DefaultArenaFloorSettings
   defaultFloorTextureName: tile-stage-1-moody-swampd
-  defaultTiling: 3
+  defaultFloorTexturePath: Assets/_Project/Art/tile-stage-1-moody-swampd.png
+  defaultTiling: 2

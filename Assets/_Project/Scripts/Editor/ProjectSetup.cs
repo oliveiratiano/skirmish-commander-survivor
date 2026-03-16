@@ -170,7 +170,8 @@ public static class ProjectSetup
         flowGO.AddComponent<GameFlowManager>();
 
         GameObject arenaGO = CreateEmpty("ArenaSetup");
-        arenaGO.AddComponent<ArenaSetup>();
+        var arenaSetup = arenaGO.AddComponent<ArenaSetup>();
+        ApplyDefaultFloorToArenaSetup(arenaSetup);
 
         GameObject boundaryGO = CreateEmpty("ArenaBoundary");
         boundaryGO.AddComponent<ArenaBoundary>();
@@ -305,5 +306,22 @@ public static class ProjectSetup
         EnsureDirectory(ART_PATH);
         // Only Art/ is ensured. Do not create unit subfolders (Commander, CloseQuarters, etc.);
         // users place sprite sheets where they want under Art/ and the import script does not create directories.
+    }
+
+    const string DEFAULT_FLOOR_SETTINGS_PATH = "Assets/Resources/DefaultArenaFloorSettings.asset";
+
+    static void ApplyDefaultFloorToArenaSetup(ArenaSetup arenaSetup)
+    {
+        if (arenaSetup == null) return;
+        var settings = AssetDatabase.LoadAssetAtPath<DefaultArenaFloorSettings>(DEFAULT_FLOOR_SETTINGS_PATH);
+        if (settings == null) return;
+        Texture2D tex = null;
+        if (!string.IsNullOrEmpty(settings.defaultFloorTexturePath))
+            tex = AssetDatabase.LoadAssetAtPath<Texture2D>(settings.defaultFloorTexturePath);
+        if (tex == null && !string.IsNullOrEmpty(settings.defaultFloorTextureName))
+            tex = Resources.Load<Texture2D>(settings.defaultFloorTextureName);
+        if (tex != null)
+            arenaSetup.floorTexture = tex;
+        arenaSetup.tiling = settings.defaultTiling;
     }
 }

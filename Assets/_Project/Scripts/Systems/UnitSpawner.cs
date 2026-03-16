@@ -10,6 +10,12 @@ public class UnitSpawner : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     public GameObject SpawnPlayerUnit(UnitData data, Vector3 position)
     {
         bool hasSprites = (data.spritesUp != null && data.spritesUp.Length > 0) || (data.spritesRight != null && data.spritesRight.Length > 0) || (data.spritesDown != null && data.spritesDown.Length > 0);

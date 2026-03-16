@@ -22,6 +22,12 @@ public class GameManager : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     public void SpawnCommander()
     {
         if (CommanderObject != null) return;

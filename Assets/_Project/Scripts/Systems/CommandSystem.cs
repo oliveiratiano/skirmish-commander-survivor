@@ -23,6 +23,12 @@ public class CommandSystem : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     void OnEnable()
     {
         SubscribeInput();

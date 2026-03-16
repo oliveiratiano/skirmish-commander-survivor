@@ -20,6 +20,12 @@ public class CommanderController : MonoBehaviour
         _health = GetComponent<HealthComponent>();
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     void Update()
     {
         if (InputHandler.Instance == null) return;

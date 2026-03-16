@@ -20,6 +20,12 @@ public class InputHandler : MonoBehaviour
         Instance = this;
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     void Update()
     {
         if (_promptTimeout > 0f)
