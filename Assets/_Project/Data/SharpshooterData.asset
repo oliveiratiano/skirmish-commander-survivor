@@ -95,13 +95,13 @@ MonoBehaviour:
   cost: 20
   maxHP: 10
   moveSpeed: 4
-  damage: 25
+  damage: 35
   range: 12
   accuracySpreadDegrees: 2
   cooldown: 2
   burstCount: 1
   burstInterval: 0
   sprayArcDegrees: 0
-  projectileSpeed: 25
+  projectileSpeed: 50
   projectileLifetime: 2
   projectileColor: {r: 1, g: 0.4, b: 1, a: 1}

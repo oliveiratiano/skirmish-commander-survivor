@@ -1,4 +1,8 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 public class WaveManager : MonoBehaviour
 {
@@ -10,7 +14,7 @@ public class WaveManager : MonoBehaviour
     public UnitData bossData;
     [Tooltip("Escort swarm bugs that form up around the boss. Fallback to enemyData with 30% speed if null.")]
     public UnitData escortData;
-    public int totalEnemies = 100;
+    public int totalEnemies = 180;
     public float baseSpawnInterval = 1.5f;
     public float minSpawnInterval = 0.2f;
 
@@ -23,17 +27,19 @@ public class WaveManager : MonoBehaviour
 
     static GameObject _enemyPrefab;
     static GameObject _bossPrefab;
-    bool _bossSpawned;
-    bool _bossKilled;
+    const int BOSS_COUNT = 3;
+    int _bossesSpawned;
+    int _bossesKilled;
     const int ESCORT_COUNT = 10;
     int _escortKilled;
+    Dictionary<GameObject, Action> _bossDeathHandlers = new Dictionary<GameObject, Action>();
 
     public int SpawnedCount => _spawnedCount;
-    public int KilledCount => _killedCount;
+    public int KilledCount => _killedCount + _bossesKilled;
     public int RemainingToSpawn => totalEnemies - _spawnedCount;
-    public int AliveCount => _spawnedCount - _killedCount + (_bossSpawned && !_bossKilled ? 1 : 0) + (ESCORT_COUNT - _escortKilled);
+    public int AliveCount => _spawnedCount - _killedCount + (BOSS_COUNT - _bossesKilled) + (BOSS_COUNT * ESCORT_COUNT - _escortKilled);
     public bool AllSpawned => _spawnedCount >= totalEnemies;
-    public bool AllDead => AllSpawned && _killedCount >= totalEnemies && (!_bossSpawned || _bossKilled) && _escortKilled >= ESCORT_COUNT;
+    public bool AllDead => AllSpawned && _killedCount >= totalEnemies && _bossesKilled >= BOSS_COUNT && _escortKilled >= BOSS_COUNT * ESCORT_COUNT;
     public float CurrentSpawnRate => _active && _currentSpawnInterval > 0 ? 1f / _currentSpawnInterval : 0f;
 
     void Awake()
@@ -52,9 +58,10 @@ public class WaveManager : MonoBehaviour
     {
         _spawnedCount = 0;
         _killedCount = 0;
-        _bossSpawned = false;
-        _bossKilled = false;
+        _bossesSpawned = 0;
+        _bossesKilled = 0;
         _escortKilled = 0;
+        _bossDeathHandlers.Clear();
         _elapsedTime = 0f;
         _currentSpawnInterval = baseSpawnInterval;
         _spawnTimer = 0f;
@@ -89,10 +96,16 @@ public class WaveManager : MonoBehaviour
             }
         }
 
-        if (bossData != null && _elapsedTime >= GameConstants.BOSS_SPAWN_TIME && !_bossSpawned)
+        if (bossData != null && _bossesSpawned < BOSS_COUNT)
         {
-            SpawnBoss();
-            _bossSpawned = true;
+            float nextTime = _bossesSpawned == 0 ? GameConstants.BOSS_SPAWN_TIME_1
+                : _bossesSpawned == 1 ? GameConstants.BOSS_SPAWN_TIME_2
+                : GameConstants.BOSS_SPAWN_TIME_3;
+            if (_elapsedTime >= nextTime)
+            {
+                SpawnBoss();
+                _bossesSpawned++;
+            }
         }
 
         UpdateDebugOverlay();
@@ -232,7 +245,7 @@ public class WaveManager : MonoBehaviour
         _enemyPrefab.SetActive(false);
 
         if (ObjectPool.Instance != null)
-            ObjectPool.Instance.Prewarm("Enemy", _enemyPrefab, 100);
+            ObjectPool.Instance.Prewarm("Enemy", _enemyPrefab, 180);
     }
 
     GameObject CreateEnemyPrefabWithSprites()
@@ -354,8 +367,14 @@ public class WaveManager : MonoBehaviour
         if (health != null)
         {
             health.Initialize(bossData.maxHP);
-            health.OnDied -= OnBossDied;
-            health.OnDied += OnBossDied;
+            if (_bossDeathHandlers.TryGetValue(go, out Action oldHandler))
+            {
+                health.OnDied -= oldHandler;
+                _bossDeathHandlers.Remove(go);
+            }
+            Action handler = () => OnBossDied(go);
+            _bossDeathHandlers[go] = handler;
+            health.OnDied += handler;
         }
 
         var move = go.GetComponent<MovementComponent>();
@@ -393,11 +412,29 @@ public class WaveManager : MonoBehaviour
             spriteAnim.SetDirectionalSprites(bossData.spritesUp, bossData.spritesRight, bossData.spritesDown);
     }
 
-    void OnBossDied()
+    void OnBossDied(GameObject boss)
     {
-        ActiveBoss = null;
-        _bossKilled = true;
-        _killedCount++;
+        if (_bossDeathHandlers.TryGetValue(boss, out Action h))
+        {
+            var health = boss.GetComponent<HealthComponent>();
+            if (health != null) health.OnDied -= h;
+            _bossDeathHandlers.Remove(boss);
+        }
+        if (ActiveBoss == boss)
+        {
+            ActiveBoss = null;
+            for (int i = 0; i < UnitAIController.AllEnemyUnits.Count; i++)
+            {
+                var u = UnitAIController.AllEnemyUnits[i];
+                if (u != null && u.gameObject.activeInHierarchy && u.data != null
+                    && u.data.unitName != null && u.data.unitName.Contains("Boss"))
+                {
+                    ActiveBoss = u.gameObject;
+                    break;
+                }
+            }
+        }
+        _bossesKilled++;
     }
 
     void SpawnBossEscorts(GameObject boss)

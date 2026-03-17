@@ -7,13 +7,19 @@ public static class GameConstants
     public const float ARENA_SAFE_HALF_SIZE = ARENA_HALF_SIZE - ARENA_DANGER_ZONE_WIDTH;
     public const float DANGER_ZONE_DPS = 15f;
 
-    public const float BOSS_SPAWN_TIME = 3f; // Swarm Bug Boss spawns at 3s
+    public const float BOSS_SPAWN_TIME_1 = 60f;
+    public const float BOSS_SPAWN_TIME_2 = 120f;
+    public const float BOSS_SPAWN_TIME_3 = 180f;
     public const float BOSS_MOVE_CHANGE_INTERVAL_MIN = 0.4f;
     public const float BOSS_MOVE_CHANGE_INTERVAL_MAX = 0.8f;
     public const float BOSS_APPROACH_WEIGHT = 0.6f; // 60% approach, 40% strafe
     public const float BOSS_ESCORT_RADIUS = 4f; // Perimeter around boss; escorts stop when within range
 
-    public const int DRAFT_BUDGET = 100;
+    public const float SWARM_COUNT_RADIUS = 14f;
+    public const int SWARM_ENGAGE_THRESHOLD = 3;
+    public const float SWARM_RETREAT_URGENCY = 0.9f;
+
+    public const int DRAFT_BUDGET = 150;
     public const float WAVE_DURATION = 180f;
     public const float SPAWN_RATE_INCREASE_INTERVAL = 30f;
     public const float HIT_FLASH_DURATION = 0.1f;

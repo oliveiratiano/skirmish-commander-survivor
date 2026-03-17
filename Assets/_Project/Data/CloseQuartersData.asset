@@ -98,10 +98,10 @@ MonoBehaviour:
   damage: 8
   range: 4
   accuracySpreadDegrees: 25
-  cooldown: 0.4
-  burstCount: 1
+  cooldown: 0.32
+  burstCount: 4
   burstInterval: 0
-  sprayArcDegrees: 0
+  sprayArcDegrees: 50
   projectileSpeed: 14
-  projectileLifetime: 1
+  projectileLifetime: 0.5
   projectileColor: {r: 0.3, g: 1, b: 0.5, a: 1}

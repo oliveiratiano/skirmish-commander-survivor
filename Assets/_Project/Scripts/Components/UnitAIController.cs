@@ -37,6 +37,9 @@ public class UnitAIController : MonoBehaviour
     bool _immuneToBoundaryDamage;
     public bool IsImmuneToBoundaryDamage => _immuneToBoundaryDamage;
 
+    int _swarmThresholdOffset;
+    float _swarmRadiusOffset;
+
     bool _movementLocked;
     CommandState _currentCommand = CommandState.FormUp;
     CommandState _effectiveCommand = CommandState.FormUp;
@@ -73,7 +76,11 @@ public class UnitAIController : MonoBehaviour
         if (isPlayer)
             AllPlayerUnits.Add(this);
         else
+        {
             AllEnemyUnits.Add(this);
+            _swarmThresholdOffset = Random.Range(-1, 2);
+            _swarmRadiusOffset = Random.Range(-0.1f, 0.1f);
+        }
     }
 
     void Start()
@@ -430,8 +437,8 @@ public class UnitAIController : MonoBehaviour
         if (_attack != null)
             _attack.enabled = true;
 
-        Transform nearest = FindNearestAnyUnit();
-        if (nearest == null)
+        Transform nearestThreat = FindNearestAnyUnit();
+        if (nearestThreat == null)
         {
             ClearShootPrepState();
             _movementLocked = false;
@@ -439,20 +446,90 @@ public class UnitAIController : MonoBehaviour
             return;
         }
 
-        float dist = (nearest.position - transform.position).magnitude;
-        if (data != null && dist <= data.range)
+        float radius = GameConstants.SWARM_COUNT_RADIUS * (1f + _swarmRadiusOffset);
+        radius = Mathf.Max(radius, 2f);
+        int playerCount = CountPlayerUnitsInRadius(radius);
+        int swarmCount = CountSwarmInRadius(radius);
+        int engageThreshold = Mathf.Max(1, GameConstants.SWARM_ENGAGE_THRESHOLD + _swarmThresholdOffset);
+
+        bool shouldRetreat = playerCount > swarmCount || swarmCount < engageThreshold;
+
+        if (shouldRetreat)
         {
-            _movementLocked = true;
-            _movement.Stop();
-            UpdateShootPrepInRange();
+            float dist = (nearestThreat.position - transform.position).magnitude;
+            if (data != null && dist <= data.range)
+            {
+                _movementLocked = true;
+                _movement.Stop();
+                UpdateShootPrepInRange();
+            }
+            else
+            {
+                ClearShootPrepState();
+                _movementLocked = false;
+                Transform nearestAlly = FindNearest(AllEnemyUnits);
+                Vector3 dir;
+                if (nearestAlly != null)
+                {
+                    dir = (nearestAlly.position - transform.position).normalized;
+                }
+                else
+                {
+                    Vector3 awayFromThreat = (transform.position - nearestThreat.position).normalized;
+                    dir = awayFromThreat;
+                }
+                if (dir.sqrMagnitude >= 0.01f)
+                {
+                    float jitter = (Random.value - 0.5f) * 10f * Mathf.Deg2Rad;
+                    dir = new Vector3(dir.x * Mathf.Cos(jitter) - dir.y * Mathf.Sin(jitter),
+                        dir.x * Mathf.Sin(jitter) + dir.y * Mathf.Cos(jitter), 0f);
+                    _movement.Move(dir * GameConstants.SWARM_RETREAT_URGENCY);
+                }
+                else
+                    _movement.Stop();
+            }
         }
         else
         {
-            ClearShootPrepState();
-            _movementLocked = false;
-            Vector3 dir = (nearest.position - transform.position).normalized;
-            _movement.Move(dir);
+            float dist = (nearestThreat.position - transform.position).magnitude;
+            if (data != null && dist <= data.range)
+            {
+                _movementLocked = true;
+                _movement.Stop();
+                UpdateShootPrepInRange();
+            }
+            else
+            {
+                ClearShootPrepState();
+                _movementLocked = false;
+                Vector3 dir = (nearestThreat.position - transform.position).normalized;
+                _movement.Move(dir);
+            }
         }
+    }
+
+    Transform FindNearestInRadius(System.Collections.Generic.List<UnitAIController> list, float radius)
+    {
+        float r2 = radius * radius;
+        Transform best = null;
+        float bestDist = float.MaxValue;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] == null || list[i] == this) continue;
+            if (!list[i].gameObject.activeInHierarchy) continue;
+            var h = list[i].GetComponent<HealthComponent>();
+            if (h != null && h.IsDead) continue;
+
+            float distSq = (list[i].transform.position - transform.position).sqrMagnitude;
+            if (distSq <= r2 && distSq < bestDist)
+            {
+                bestDist = distSq;
+                best = list[i].transform;
+            }
+        }
+
+        return best;
     }
 
     void UpdateShootPrepInRange()
@@ -542,6 +619,53 @@ public class UnitAIController : MonoBehaviour
             _movement.Move(toTarget.normalized * urgency);
         else
             _movement.Stop();
+    }
+
+    int CountPlayerUnitsInRadius(float radius)
+    {
+        float r2 = radius * radius;
+        Vector3 pos = transform.position;
+        int count = 0;
+
+        for (int i = 0; i < AllPlayerUnits.Count; i++)
+        {
+            if (AllPlayerUnits[i] == null || !AllPlayerUnits[i].gameObject.activeInHierarchy) continue;
+            var h = AllPlayerUnits[i].GetComponent<HealthComponent>();
+            if (h != null && h.IsDead) continue;
+            if ((AllPlayerUnits[i].transform.position - pos).sqrMagnitude <= r2)
+                count++;
+        }
+
+        if (CommanderController.Instance != null)
+        {
+            var cmdHealth = CommanderController.Instance.GetComponent<HealthComponent>();
+            if (cmdHealth != null && !cmdHealth.IsDead)
+            {
+                if ((CommanderController.Instance.transform.position - pos).sqrMagnitude <= r2)
+                    count++;
+            }
+        }
+
+        return count;
+    }
+
+    int CountSwarmInRadius(float radius)
+    {
+        float r2 = radius * radius;
+        Vector3 pos = transform.position;
+        int count = 0;
+
+        for (int i = 0; i < AllEnemyUnits.Count; i++)
+        {
+            if (AllEnemyUnits[i] == null || AllEnemyUnits[i] == this) continue;
+            if (!AllEnemyUnits[i].gameObject.activeInHierarchy) continue;
+            var h = AllEnemyUnits[i].GetComponent<HealthComponent>();
+            if (h != null && h.IsDead) continue;
+            if ((AllEnemyUnits[i].transform.position - pos).sqrMagnitude <= r2)
+                count++;
+        }
+
+        return count;
     }
 
     Transform FindNearest(System.Collections.Generic.List<UnitAIController> list)

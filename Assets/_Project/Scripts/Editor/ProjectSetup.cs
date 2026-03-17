@@ -44,11 +44,12 @@ public static class ProjectSetup
             damage = 8f,
             range = 4f,
             accuracySpread = 25f,
-            cooldown = 0.4f,
-            burstCount = 1,
+            cooldown = 0.32f,
+            burstCount = 4,
             burstInterval = 0f,
+            sprayArcDegrees = 50f,
             projectileSpeed = 14f,
-            projectileLifetime = 1f,
+            projectileLifetime = 0.5f,
             projectileColor = new Color(0.3f, 1f, 0.5f)
         });
 
@@ -77,13 +78,13 @@ public static class ProjectSetup
             cost = 20,
             maxHP = 10f,
             moveSpeed = 4f,
-            damage = 25f,
+            damage = 35f,
             range = 12f,
             accuracySpread = 2f,
             cooldown = 2f,
             burstCount = 1,
             burstInterval = 0f,
-            projectileSpeed = 25f,
+            projectileSpeed = 50f,
             projectileLifetime = 2f,
             projectileColor = new Color(1f, 0.4f, 1f)
         });
