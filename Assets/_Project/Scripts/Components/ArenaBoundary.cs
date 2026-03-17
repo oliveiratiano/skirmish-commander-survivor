@@ -26,6 +26,7 @@ public class ArenaBoundary : MonoBehaviour
         for (int i = 0; i < units.Count; i++)
         {
             if (units[i] == null || !units[i].gameObject.activeInHierarchy) continue;
+            if (!units[i].IsPlayerUnit && units[i].IsImmuneToBoundaryDamage) continue;
             var health = units[i].GetComponent<HealthComponent>();
             if (health == null || health.IsDead) continue;
 

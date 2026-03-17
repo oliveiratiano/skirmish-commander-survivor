@@ -34,6 +34,9 @@ public class UnitAIController : MonoBehaviour
 
     Transform _formUpTarget;
 
+    bool _immuneToBoundaryDamage;
+    public bool IsImmuneToBoundaryDamage => _immuneToBoundaryDamage;
+
     bool _movementLocked;
     CommandState _currentCommand = CommandState.FormUp;
     CommandState _effectiveCommand = CommandState.FormUp;
@@ -99,6 +102,11 @@ public class UnitAIController : MonoBehaviour
     public void SetFormUpTarget(Transform target)
     {
         _formUpTarget = target;
+    }
+
+    public void SetImmuneToBoundaryDamage(bool immune)
+    {
+        _immuneToBoundaryDamage = immune;
     }
 
     public void ReceiveCommand(CommandState state, bool withPropagation = false)
@@ -184,17 +192,21 @@ public class UnitAIController : MonoBehaviour
                 _promptedIndicator.gameObject.SetActive(show);
             }
         }
-        else if (data != null && !string.IsNullOrEmpty(data.unitName) && data.unitName.Contains("Boss"))
-        {
-            UpdateBossUnit();
-        }
-        else if (_formUpTarget != null && _formUpTarget.gameObject.activeInHierarchy)
-        {
-            UpdateEscortUnit();
-        }
         else
         {
-            UpdateEnemyUnit();
+            if (_immuneToBoundaryDamage)
+            {
+                Vector3 pos = transform.position;
+                float safe = GameConstants.ARENA_SAFE_HALF_SIZE;
+                if (Mathf.Abs(pos.x) <= safe && Mathf.Abs(pos.y) <= safe)
+                    _immuneToBoundaryDamage = false;
+            }
+            if (data != null && !string.IsNullOrEmpty(data.unitName) && data.unitName.Contains("Boss"))
+                UpdateBossUnit();
+            else if (_formUpTarget != null && _formUpTarget.gameObject.activeInHierarchy)
+                UpdateEscortUnit();
+            else
+                UpdateEnemyUnit();
         }
 
         if (!_movementLocked)

@@ -224,7 +224,7 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -232,13 +232,13 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 **Goal:** Enemies never spawn within a minimum distance of the Commander (respawn radius). Camera zoom and mobility are limited so that spawns always occur outside the player's field of view (no spawning on-screen).
 
-**Design decisions (to refine when starting):** (1) **Respawn radius:** Constant (e.g. in `GameConstants`). In `GetSpawnPosition`, reject or re-sample candidate positions until one is at least that far from the Commander (or derive positions from a ring/arc at that distance). (2) **Camera limits:** Cap max orthographic size (and optionally scroll range) so that the visible viewport never extends into the spawn region. Optionally clamp camera position so the viewport cannot pan into spawn-only zones. Result: spawn region is always off-screen.
+**Design decisions (to refine when starting):** (1) **Respawn radius:** Constant (e.g. in `GameConstants`). In `GetSpawnPosition`, reject or re-sample candidate positions until one is at least that far from the Commander (or derive positions from a ring/arc at that distance). (2) **Camera limits:** Cap max orthographic size (and optionally scroll range) so that the visible viewport never extends into the spawn region. Optionally clamp camera position so the viewport cannot pan into spawn-only zones. Result: spawn region is always off-screen. (3) **Multi-phase:** When adding multiple arenas/phases, spawn config (radius, camera limits) should be scoped per arena/phase so different modes can override or disable.
 
 **Slices:** To be broken down when starting (e.g. Slice 1: add respawn radius and enforce in `GetSpawnPosition`; Slice 2: cap camera zoom/mobility so spawn region stays outside FOV; tune constants).
 
 | Status |
 |--------|
-| [ ] Not started |
+| [ ] Deferred until multi-phase/arena structure exists |
 
 ---
 

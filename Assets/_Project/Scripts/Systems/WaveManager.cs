@@ -145,6 +145,7 @@ public class WaveManager : MonoBehaviour
             else if (!UnitAIController.AllEnemyUnits.Contains(ai))
                 UnitAIController.AllEnemyUnits.Add(ai);
             ai.SetFormUpTarget(null);
+            ai.SetImmuneToBoundaryDamage(true);
         }
 
         var attack = go.GetComponent<RangedAttackComponent>();
@@ -368,6 +369,7 @@ public class WaveManager : MonoBehaviour
                 ai.Initialize(bossData, isPlayer: false);
             else if (!UnitAIController.AllEnemyUnits.Contains(ai))
                 UnitAIController.AllEnemyUnits.Add(ai);
+            ai.SetImmuneToBoundaryDamage(true);
         }
 
         var attack = go.GetComponent<RangedAttackComponent>();
@@ -451,6 +453,7 @@ public class WaveManager : MonoBehaviour
                 ai.Initialize(escort, isPlayer: false);
             else if (!UnitAIController.AllEnemyUnits.Contains(ai))
                 UnitAIController.AllEnemyUnits.Add(ai);
+            ai.SetImmuneToBoundaryDamage(true);
             ai.SetFormUpTarget(bossTransform);
         }
 
