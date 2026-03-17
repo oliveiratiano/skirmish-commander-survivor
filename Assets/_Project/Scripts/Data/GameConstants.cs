@@ -18,8 +18,6 @@ public static class GameConstants
     public const float SWARM_COUNT_RADIUS = 14f;
     public const int SWARM_ENGAGE_THRESHOLD = 3;
     public const float SWARM_RETREAT_URGENCY = 0.9f;
-    public const float KITE_MIN_SHOOT_DISTANCE = 2.5f;
-
     public const int DRAFT_BUDGET = 150;
     public const float WAVE_DURATION = 180f;
     public const float SPAWN_RATE_INCREASE_INTERVAL = 30f;
@@ -79,7 +77,7 @@ public static class GameConstants
             case CommandState.Attack: return new Color(0.9f, 0.25f, 0.2f, 0.9f);
             case CommandState.StandGround: return new Color(0.2f, 0.8f, 0.3f, 0.9f);
             case CommandState.Regroup: return new Color(0.2f, 0.4f, 0.9f, 0.9f);
-            case CommandState.Kite: return new Color(0.2f, 0.7f, 0.9f, 0.9f);
+            case CommandState.Follow: return new Color(0.2f, 0.7f, 0.9f, 0.9f);
             default: return Color.white;
         }
     }

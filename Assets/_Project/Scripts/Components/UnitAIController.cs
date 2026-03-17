@@ -41,8 +41,8 @@ public class UnitAIController : MonoBehaviour
     float _swarmRadiusOffset;
 
     bool _movementLocked;
-    CommandState _currentCommand = CommandState.Kite;
-    CommandState _effectiveCommand = CommandState.Kite;
+    CommandState _currentCommand = CommandState.Follow;
+    CommandState _effectiveCommand = CommandState.Follow;
     float _reactionTimer = -1f;
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
@@ -62,7 +62,7 @@ public class UnitAIController : MonoBehaviour
 
         _health.OnDied += HandleDeath;
 
-        _currentCommand = CommandState.Kite;
+        _currentCommand = CommandState.Follow;
 
         if (isPlayer && GameManager.Instance != null && GameManager.Instance.playerUnitTypes != null)
         {
@@ -245,38 +245,11 @@ public class UnitAIController : MonoBehaviour
             case CommandState.Regroup:
                 HandleRegroup();
                 break;
-            case CommandState.Kite:
+            case CommandState.Follow:
                 if (_attack != null)
                     _attack.enabled = true;
-                HandleKite();
+                HandleFollow();
                 break;
-        }
-    }
-
-    void HandleAttack()
-    {
-        Transform nearest = FindNearest(AllEnemyUnits);
-        if (nearest == null)
-        {
-            ClearShootPrepState();
-            _movementLocked = false;
-            _movement.Stop();
-            return;
-        }
-
-        float dist = (nearest.position - transform.position).magnitude;
-        if (data != null && dist <= data.range)
-        {
-            _movementLocked = true;
-            _movement.Stop();
-            UpdateShootPrepInRange();
-        }
-        else
-        {
-            ClearShootPrepState();
-            _movementLocked = false;
-            Vector3 dir = (nearest.position - transform.position).normalized;
-            _movement.Move(dir);
         }
     }
 
@@ -307,7 +280,7 @@ public class UnitAIController : MonoBehaviour
         }
     }
 
-    void HandleKite()
+    void HandleAttack()
     {
         Transform nearest = FindNearest(AllEnemyUnits);
         if (nearest == null)
@@ -319,7 +292,7 @@ public class UnitAIController : MonoBehaviour
         }
 
         float dist = (nearest.position - transform.position).magnitude;
-        float minShoot = GameConstants.KITE_MIN_SHOOT_DISTANCE;
+        float minShoot = data != null ? data.range * 0.5f : 2.5f;
         if (data != null && minShoot <= dist && dist <= data.range)
         {
             _movementLocked = true;
@@ -330,7 +303,8 @@ public class UnitAIController : MonoBehaviour
         {
             ClearShootPrepState();
             _movementLocked = false;
-            Vector3 dir = (transform.position - nearest.position).normalized;
+            Vector3 awayFromEnemy = (transform.position - nearest.position).normalized;
+            Vector3 dir = GetRetreatDirectionAvoidingDangerZone(transform.position, awayFromEnemy);
             _movement.Move(dir * GameConstants.SWARM_RETREAT_URGENCY);
         }
         else
@@ -339,6 +313,41 @@ public class UnitAIController : MonoBehaviour
             _movementLocked = false;
             Vector3 dir = (nearest.position - transform.position).normalized;
             _movement.Move(dir);
+        }
+    }
+
+    void HandleFollow()
+    {
+        if (CommanderController.Instance == null)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            _movement.Stop();
+            return;
+        }
+
+        bool enemyInRange = false;
+        if (_attack != null && data != null)
+        {
+            Transform nearest = FindNearest(AllEnemyUnits);
+            if (nearest != null)
+            {
+                float dist = (nearest.position - transform.position).magnitude;
+                enemyInRange = dist <= data.range;
+            }
+        }
+
+        if (enemyInRange)
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+        }
+        else
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            MoveTowardCommander(0.85f);
         }
     }
 
@@ -355,8 +364,8 @@ public class UnitAIController : MonoBehaviour
             float dist = (CommanderController.Instance.transform.position - transform.position).magnitude;
             if (dist <= GameConstants.COMMANDER_RADIUS)
             {
-                _currentCommand = CommandState.Kite;
-                _effectiveCommand = CommandState.Kite;
+                _currentCommand = CommandState.Follow;
+                _effectiveCommand = CommandState.Follow;
                 ExitRegroupMode();
                 return;
             }
@@ -622,6 +631,29 @@ public class UnitAIController : MonoBehaviour
             _attack.CanFire = false;
         }
         ClearShootPrepState();
+    }
+
+    Vector3 GetRetreatDirectionAvoidingDangerZone(Vector3 from, Vector3 awayFromEnemy)
+    {
+        float safe = GameConstants.ARENA_SAFE_HALF_SIZE;
+        float step = 1f;
+        Vector3 candidate = from + awayFromEnemy * step;
+        bool wouldEnterDanger = Mathf.Abs(candidate.x) > safe || Mathf.Abs(candidate.y) > safe;
+        if (!wouldEnterDanger)
+            return awayFromEnemy;
+
+        Vector3 towardSafe = Vector3.zero;
+        if (Mathf.Abs(from.x) > 0.01f || Mathf.Abs(from.y) > 0.01f)
+            towardSafe = new Vector3(-from.x, -from.y, 0f).normalized;
+
+        Vector3 blended = (awayFromEnemy + towardSafe * 2f).normalized;
+        Vector3 blendedCandidate = from + blended * step;
+        if (Mathf.Abs(blendedCandidate.x) <= safe && Mathf.Abs(blendedCandidate.y) <= safe)
+            return blended;
+
+        if (towardSafe.sqrMagnitude > 0.01f)
+            return towardSafe;
+        return awayFromEnemy;
     }
 
     void MoveTowardCommander(float urgency)

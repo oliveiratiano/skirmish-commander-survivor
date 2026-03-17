@@ -7,14 +7,14 @@ public enum CommandState
     Attack,
     StandGround,
     Regroup,
-    Kite
+    Follow
 }
 
 public class CommandSystem : MonoBehaviour
 {
     public static CommandSystem Instance { get; private set; }
 
-    public CommandState CurrentState { get; private set; } = CommandState.Kite;
+    public CommandState CurrentState { get; private set; } = CommandState.Follow;
 
     public event Action<CommandState> OnStateChanged;
 

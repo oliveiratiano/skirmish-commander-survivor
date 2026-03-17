@@ -48,14 +48,14 @@ public class InputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha4)) { _promptedTypeIndices.Add(3); _promptTimeout = GameConstants.ATTENTION_PROMPT_TIMEOUT; }
 
         bool shiftHeld = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-        if (Input.GetKeyDown(KeyCode.RightArrow))
-            OnCommandStateChanged?.Invoke(CommandState.Attack, shiftHeld);
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            OnCommandStateChanged?.Invoke(CommandState.Follow, shiftHeld);
         if (Input.GetKeyDown(KeyCode.UpArrow))
             OnCommandStateChanged?.Invoke(CommandState.StandGround, shiftHeld);
         if (Input.GetKeyDown(KeyCode.DownArrow))
             OnCommandStateChanged?.Invoke(CommandState.Regroup, shiftHeld);
-        if (Input.GetKeyDown(KeyCode.LeftArrow))
-            OnCommandStateChanged?.Invoke(CommandState.Kite, shiftHeld);
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+            OnCommandStateChanged?.Invoke(CommandState.Attack, shiftHeld);
 
         if (Input.GetKeyDown(KeyCode.F3))
             OnDebugToggle?.Invoke();
