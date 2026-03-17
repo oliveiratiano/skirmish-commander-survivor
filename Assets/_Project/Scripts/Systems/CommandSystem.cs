@@ -5,15 +5,16 @@ using UnityEngine;
 public enum CommandState
 {
     Attack,
-    FormUp,
-    Regroup
+    StandGround,
+    Regroup,
+    Kite
 }
 
 public class CommandSystem : MonoBehaviour
 {
     public static CommandSystem Instance { get; private set; }
 
-    public CommandState CurrentState { get; private set; } = CommandState.FormUp;
+    public CommandState CurrentState { get; private set; } = CommandState.Kite;
 
     public event Action<CommandState> OnStateChanged;
 

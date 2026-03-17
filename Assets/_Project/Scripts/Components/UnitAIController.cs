@@ -41,8 +41,8 @@ public class UnitAIController : MonoBehaviour
     float _swarmRadiusOffset;
 
     bool _movementLocked;
-    CommandState _currentCommand = CommandState.FormUp;
-    CommandState _effectiveCommand = CommandState.FormUp;
+    CommandState _currentCommand = CommandState.Kite;
+    CommandState _effectiveCommand = CommandState.Kite;
     float _reactionTimer = -1f;
     public static readonly System.Collections.Generic.List<UnitAIController> AllPlayerUnits
         = new System.Collections.Generic.List<UnitAIController>();
@@ -62,7 +62,7 @@ public class UnitAIController : MonoBehaviour
 
         _health.OnDied += HandleDeath;
 
-        _currentCommand = CommandState.FormUp;
+        _currentCommand = CommandState.Kite;
 
         if (isPlayer && GameManager.Instance != null && GameManager.Instance.playerUnitTypes != null)
         {
@@ -237,13 +237,18 @@ public class UnitAIController : MonoBehaviour
                     _attack.enabled = true;
                 HandleAttack();
                 break;
-            case CommandState.FormUp:
+            case CommandState.StandGround:
                 if (_attack != null)
                     _attack.enabled = true;
-                HandleFormUp();
+                HandleStandGround();
                 break;
             case CommandState.Regroup:
                 HandleRegroup();
+                break;
+            case CommandState.Kite:
+                if (_attack != null)
+                    _attack.enabled = true;
+                HandleKite();
                 break;
         }
     }
@@ -275,16 +280,8 @@ public class UnitAIController : MonoBehaviour
         }
     }
 
-    void HandleFormUp()
+    void HandleStandGround()
     {
-        if (CommanderController.Instance == null)
-        {
-            ClearShootPrepState();
-            _movementLocked = false;
-            _movement.Stop();
-            return;
-        }
-
         bool enemyInRange = false;
         if (_attack != null && data != null)
         {
@@ -306,7 +303,42 @@ public class UnitAIController : MonoBehaviour
         {
             ClearShootPrepState();
             _movementLocked = false;
+            _movement.Stop();
+        }
+    }
+
+    void HandleKite()
+    {
+        Transform nearest = FindNearest(AllEnemyUnits);
+        if (nearest == null)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
             MoveTowardCommander(0.85f);
+            return;
+        }
+
+        float dist = (nearest.position - transform.position).magnitude;
+        float minShoot = GameConstants.KITE_MIN_SHOOT_DISTANCE;
+        if (data != null && minShoot <= dist && dist <= data.range)
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+        }
+        else if (dist < minShoot)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            Vector3 dir = (transform.position - nearest.position).normalized;
+            _movement.Move(dir * GameConstants.SWARM_RETREAT_URGENCY);
+        }
+        else
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            Vector3 dir = (nearest.position - transform.position).normalized;
+            _movement.Move(dir);
         }
     }
 
@@ -323,8 +355,8 @@ public class UnitAIController : MonoBehaviour
             float dist = (CommanderController.Instance.transform.position - transform.position).magnitude;
             if (dist <= GameConstants.COMMANDER_RADIUS)
             {
-                _currentCommand = CommandState.FormUp;
-                _effectiveCommand = CommandState.FormUp;
+                _currentCommand = CommandState.Kite;
+                _effectiveCommand = CommandState.Kite;
                 ExitRegroupMode();
                 return;
             }

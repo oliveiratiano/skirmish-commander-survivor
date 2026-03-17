@@ -51,9 +51,11 @@ public class InputHandler : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightArrow))
             OnCommandStateChanged?.Invoke(CommandState.Attack, shiftHeld);
         if (Input.GetKeyDown(KeyCode.UpArrow))
-            OnCommandStateChanged?.Invoke(CommandState.FormUp, shiftHeld);
+            OnCommandStateChanged?.Invoke(CommandState.StandGround, shiftHeld);
         if (Input.GetKeyDown(KeyCode.DownArrow))
             OnCommandStateChanged?.Invoke(CommandState.Regroup, shiftHeld);
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+            OnCommandStateChanged?.Invoke(CommandState.Kite, shiftHeld);
 
         if (Input.GetKeyDown(KeyCode.F3))
             OnDebugToggle?.Invoke();

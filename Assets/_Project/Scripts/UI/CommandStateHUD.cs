@@ -5,8 +5,8 @@ public class CommandStateHUD : MonoBehaviour
     GUIStyle _style;
     GUIStyle _activeStyle;
 
-    readonly string[] _stateNames = { "ATTACK [→]", "FORM UP [↑]", "REGROUP [↓]" };
-    readonly Color[] _stateColors = { new Color(0.9f, 0.3f, 0.2f), new Color(0.2f, 0.7f, 0.9f), new Color(0.9f, 0.8f, 0.2f) };
+    readonly string[] _stateNames = { "ATTACK [→]", "STAND GROUND [↑]", "REGROUP [↓]", "KITE [←]" };
+    readonly Color[] _stateColors = { new Color(0.9f, 0.3f, 0.2f), new Color(0.2f, 0.8f, 0.3f), new Color(0.9f, 0.8f, 0.2f), new Color(0.2f, 0.7f, 0.9f) };
 
     void OnGUI()
     {
@@ -17,10 +17,10 @@ public class CommandStateHUD : MonoBehaviour
         CommandState current = CommandSystem.Instance.CurrentState;
 
         float y = Screen.height - 50f;
-        float totalWidth = 180f * 3f + 20f;
+        float totalWidth = 180f * 4f + 20f;
         float startX = (Screen.width - totalWidth) / 2f;
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 4; i++)
         {
             CommandState state = (CommandState)i;
             bool isActive = current == state;

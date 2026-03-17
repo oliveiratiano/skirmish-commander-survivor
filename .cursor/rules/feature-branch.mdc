@@ -1,0 +1,14 @@
+---
+description: Create a feature branch before starting work on a new feature
+alwaysApply: true
+---
+
+# Feature Branch
+
+When starting work on a new feature (e.g. from backlog, user request, or plan):
+
+1. Create a feature branch first: `git checkout -b feature/kebab-case-name`
+2. Use kebab-case for the branch name (e.g. `feature/kite-command`, `feature/border-damage-immunity`)
+3. On Windows PowerShell, use `;` instead of `&&` to chain commands (e.g. `cd path; git checkout -b feature/name`)
+
+Do not begin implementing until the branch is created.
