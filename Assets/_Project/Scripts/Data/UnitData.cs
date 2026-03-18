@@ -38,4 +38,8 @@ public class UnitData : ScriptableObject
     public float projectileSpeed = 15f;
     public float projectileLifetime = 2f;
     public Color projectileColor = Color.yellow;
+
+    [Header("Audio")]
+    [Tooltip("Gunshot sound played via PlayOneShot each time this unit fires. Leave empty for silent.")]
+    public AudioClip shotClip;
 }

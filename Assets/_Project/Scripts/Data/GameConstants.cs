@@ -34,6 +34,10 @@ public static class GameConstants
     public const float RELAY_RADIUS = 13f;
     public const float COMMAND_FEEDBACK_DELAY = 1f;
     public const float COMMAND_FEEDBACK_DURATION = 1f;
+
+    // Audio
+    public const float SHOT_AUDIO_PITCH_VARIANCE = 0.08f; // ±8% random pitch per shot
+    public const float SHOT_AUDIO_MAX_DISTANCE = 25f;     // skip audio beyond this distance from Commander
     public const float COMMANDER_RADIUS = 2.5f;
 
     // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.

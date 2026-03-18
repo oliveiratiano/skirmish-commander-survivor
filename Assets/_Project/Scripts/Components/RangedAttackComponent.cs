@@ -12,10 +12,17 @@ public class RangedAttackComponent : MonoBehaviour
     float _burstTimer;
     bool _isBursting;
 
+    AudioSource _audioSource;
+
     static GameObject _projectilePrefab;
 
     public bool IsShooting => _isBursting;
     public bool CanFire { get; set; } = true;
+
+    void Start()
+    {
+        _audioSource = GetComponent<AudioSource>();
+    }
 
     void Update()
     {
@@ -101,9 +108,25 @@ public class RangedAttackComponent : MonoBehaviour
         }
     }
 
+    void PlayShotSound()
+    {
+        if (_audioSource == null || data == null || data.shotClip == null) return;
+
+        // Distance cull: skip audio if too far from Commander to keep voice count manageable
+        if (CommanderController.Instance != null)
+        {
+            float sqrDist = (transform.position - CommanderController.Instance.transform.position).sqrMagnitude;
+            if (sqrDist > GameConstants.SHOT_AUDIO_MAX_DISTANCE * GameConstants.SHOT_AUDIO_MAX_DISTANCE) return;
+        }
+
+        _audioSource.pitch = 1f + UnityEngine.Random.Range(-GameConstants.SHOT_AUDIO_PITCH_VARIANCE, GameConstants.SHOT_AUDIO_PITCH_VARIANCE);
+        _audioSource.PlayOneShot(data.shotClip);
+    }
+
     void SpawnProjectile(Vector3 direction)
     {
         EnsurePrefab();
+        PlayShotSound();
 
         GameObject go = null;
         if (ObjectPool.Instance != null)

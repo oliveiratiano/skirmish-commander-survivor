@@ -29,6 +29,7 @@ public class UnitSpawner : MonoBehaviour
         var attack = go.AddComponent<RangedAttackComponent>();
         attack.data = data;
         attack.isPlayerUnit = true;
+        ConfigureShotAudio(go);
         var ai = go.AddComponent<UnitAIController>();
         ai.Initialize(data, isPlayer: true);
 
@@ -62,6 +63,7 @@ public class UnitSpawner : MonoBehaviour
         var attack = go.AddComponent<RangedAttackComponent>();
         attack.data = data;
         attack.isPlayerUnit = true;
+        ConfigureShotAudio(go);
         var ai = go.AddComponent<UnitAIController>();
         ai.Initialize(data, isPlayer: true);
 
@@ -76,6 +78,17 @@ public class UnitSpawner : MonoBehaviour
             DebugOverlay.Instance.SetPlayerUnitCount(UnitAIController.AllPlayerUnits.Count);
 
         return go;
+    }
+
+    static void ConfigureShotAudio(GameObject go)
+    {
+        var sfx = go.AddComponent<AudioSource>();
+        sfx.spatialBlend = 1f;
+        sfx.rolloffMode = AudioRolloffMode.Linear;
+        sfx.minDistance = 3f;
+        sfx.maxDistance = 30f;
+        sfx.playOnAwake = false;
+        sfx.loop = false;
     }
 
     public void SpawnDraftedArmy(UnitData[] units, int[] counts, Vector3 center)

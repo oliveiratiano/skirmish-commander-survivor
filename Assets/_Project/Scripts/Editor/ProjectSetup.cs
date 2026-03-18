@@ -214,6 +214,10 @@ public static class ProjectSetup
         GameObject flowGO = CreateEmpty("GameFlowManager");
         flowGO.AddComponent<GameFlowManager>();
 
+        GameObject musicGO = CreateEmpty("MusicManager");
+        musicGO.AddComponent<AudioSource>();
+        musicGO.AddComponent<MusicManager>();
+
         GameObject arenaGO = CreateEmpty("ArenaSetup");
         var arenaSetup = arenaGO.AddComponent<ArenaSetup>();
         ApplyDefaultFloorToArenaSetup(arenaSetup);
@@ -274,6 +278,22 @@ public static class ProjectSetup
     {
         CreateDataAssets();
         BuildGameScene();
+    }
+
+    [MenuItem("Commander Survival/4. Add MusicManager to Scene", priority = 4)]
+    static void AddMusicManagerToScene()
+    {
+        if (Object.FindFirstObjectByType<MusicManager>() != null)
+        {
+            Debug.Log("[ProjectSetup] MusicManager already in scene.");
+            return;
+        }
+        var go = new GameObject("MusicManager");
+        go.AddComponent<AudioSource>();
+        go.AddComponent<MusicManager>();
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(
+            UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene());
+        Debug.Log("[ProjectSetup] MusicManager added. Assign Stage1 BGM in inspector.");
     }
 
     struct UnitDataConfig

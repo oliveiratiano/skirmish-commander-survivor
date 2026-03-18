@@ -237,6 +237,7 @@ public class WaveManager : MonoBehaviour
             var attack = _enemyPrefab.AddComponent<RangedAttackComponent>();
             attack.data = enemyData;
             attack.isPlayerUnit = false;
+            ConfigureShotAudio(_enemyPrefab);
             _enemyPrefab.AddComponent<HitFlashComponent>();
             _enemyPrefab.AddComponent<ProceduralAnimator>();
             _enemyPrefab.AddComponent<IsometricSorting>();
@@ -268,6 +269,7 @@ public class WaveManager : MonoBehaviour
         var attack = go.AddComponent<RangedAttackComponent>();
         attack.data = enemyData;
         attack.isPlayerUnit = false;
+        ConfigureShotAudio(go);
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
         var anim = go.AddComponent<SpriteSheetAnimator>();
@@ -295,6 +297,7 @@ public class WaveManager : MonoBehaviour
             var attack = _bossPrefab.AddComponent<RangedAttackComponent>();
             attack.data = bossData;
             attack.isPlayerUnit = false;
+            ConfigureShotAudio(_bossPrefab);
             _bossPrefab.AddComponent<HitFlashComponent>();
             _bossPrefab.AddComponent<ProceduralAnimator>();
             _bossPrefab.AddComponent<IsometricSorting>();
@@ -326,6 +329,7 @@ public class WaveManager : MonoBehaviour
         var attack = go.AddComponent<RangedAttackComponent>();
         attack.data = bossData;
         attack.isPlayerUnit = false;
+        ConfigureShotAudio(go);
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
         var anim = go.AddComponent<SpriteSheetAnimator>();
@@ -517,6 +521,17 @@ public class WaveManager : MonoBehaviour
     void OnBossEscortDied()
     {
         _escortKilled++;
+    }
+
+    static void ConfigureShotAudio(GameObject go)
+    {
+        var sfx = go.AddComponent<AudioSource>();
+        sfx.spatialBlend = 1f;
+        sfx.rolloffMode = AudioRolloffMode.Linear;
+        sfx.minDistance = 3f;
+        sfx.maxDistance = 30f;
+        sfx.playOnAwake = false;
+        sfx.loop = false;
     }
 
     void UpdateDebugOverlay()

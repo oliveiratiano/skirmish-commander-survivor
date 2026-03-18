@@ -51,6 +51,7 @@ public class GameManager : MonoBehaviour
         var attack = CommanderObject.AddComponent<RangedAttackComponent>();
         attack.data = commanderData;
         attack.isPlayerUnit = true;
+        ConfigureShotAudio(CommanderObject);
 
         CommanderObject.AddComponent<HitFlashComponent>();
         CommanderObject.AddComponent<ProceduralAnimator>();
@@ -84,6 +85,7 @@ public class GameManager : MonoBehaviour
         var attack = go.AddComponent<RangedAttackComponent>();
         attack.data = commanderData;
         attack.isPlayerUnit = true;
+        ConfigureShotAudio(go);
 
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();
@@ -98,6 +100,17 @@ public class GameManager : MonoBehaviour
         var cam = Camera.main.GetComponent<CameraController>();
         if (cam != null)
             cam.target = go.transform;
+    }
+
+    static void ConfigureShotAudio(GameObject go)
+    {
+        var sfx = go.AddComponent<AudioSource>();
+        sfx.spatialBlend = 1f;
+        sfx.rolloffMode = AudioRolloffMode.Linear;
+        sfx.minDistance = 3f;
+        sfx.maxDistance = 30f;
+        sfx.playOnAwake = false;
+        sfx.loop = false;
     }
 
     public static GameObject CreatePrimitive(string name, Vector3 position, Color color, float scale)
