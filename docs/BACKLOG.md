@@ -252,7 +252,7 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
