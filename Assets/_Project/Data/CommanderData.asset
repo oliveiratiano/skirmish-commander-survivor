@@ -105,4 +105,3 @@ MonoBehaviour:
   projectileSpeed: 18
   projectileLifetime: 1.5
   projectileColor: {r: 0.4, g: 0.8, b: 1, a: 1}
-  shotClip: {fileID: 0}

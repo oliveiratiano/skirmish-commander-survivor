@@ -40,6 +40,7 @@ public class UnitData : ScriptableObject
     public Color projectileColor = Color.yellow;
 
     [Header("Audio")]
-    [Tooltip("Gunshot sound played via PlayOneShot each time this unit fires. Leave empty for silent.")]
-    public AudioClip shotClip;
+    [Tooltip("Playback volume for this unit's shot sound. 1.0 = default; 1.2 = 20% louder.")]
+    public float shotVolume = 1.0f;
+
 }

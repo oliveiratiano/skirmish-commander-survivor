@@ -184,6 +184,34 @@ public class WaveManager : MonoBehaviour
 
     Vector3 GetSpawnPosition()
     {
+        Vector3 commanderPos = CommanderController.Instance != null
+            ? CommanderController.Instance.transform.position
+            : Vector3.zero;
+        float minDistSq = GameConstants.MIN_SPAWN_DISTANCE_FROM_COMMANDER
+                        * GameConstants.MIN_SPAWN_DISTANCE_FROM_COMMANDER;
+
+        for (int attempt = 0; attempt < GameConstants.SPAWN_POSITION_MAX_RETRIES; attempt++)
+        {
+            Vector3 candidate = GetSpawnPositionCandidate();
+            if ((candidate - commanderPos).sqrMagnitude >= minDistSq)
+                return candidate;
+        }
+
+        // All retries too close — push the last candidate outward from the Commander
+        Vector3 fallback = GetSpawnPositionCandidate();
+        Vector3 away = (fallback - commanderPos);
+        if (away.sqrMagnitude < 0.01f)
+            away = new Vector3(1f, 0f, 0f);
+        fallback = commanderPos + away.normalized * GameConstants.MIN_SPAWN_DISTANCE_FROM_COMMANDER;
+
+        float half = GameConstants.ARENA_HALF_SIZE;
+        fallback.x = Mathf.Clamp(fallback.x, -half, half);
+        fallback.y = Mathf.Clamp(fallback.y, -half, half);
+        return fallback;
+    }
+
+    Vector3 GetSpawnPositionCandidate()
+    {
         Camera cam = Camera.main;
         float camHeight = cam.orthographicSize;
         float camWidth = camHeight * cam.aspect;

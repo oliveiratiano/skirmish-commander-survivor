@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class RangedAttackComponent : MonoBehaviour
@@ -13,6 +14,7 @@ public class RangedAttackComponent : MonoBehaviour
     bool _isBursting;
 
     AudioSource _audioSource;
+    AudioClip[] _shotClips;
 
     static GameObject _projectilePrefab;
 
@@ -22,6 +24,23 @@ public class RangedAttackComponent : MonoBehaviour
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
+        _shotClips = LoadShotClips();
+    }
+
+    // Loads Audio/SFX/Weapons/shot_{unitname}_0, _1, ... from Resources.
+    // See docs/audio-file-conventions.md for naming rules.
+    AudioClip[] LoadShotClips()
+    {
+        if (data == null || string.IsNullOrEmpty(data.unitName)) return null;
+        string basePath = $"Audio/SFX/Weapons/shot_{data.unitName.ToLower().Replace(" ", "_").Replace("-", "_")}";
+        var list = new List<AudioClip>();
+        for (int i = 0; ; i++)
+        {
+            var clip = Resources.Load<AudioClip>($"{basePath}_{i}");
+            if (clip == null) break;
+            list.Add(clip);
+        }
+        return list.Count > 0 ? list.ToArray() : null;
     }
 
     void Update()
@@ -110,7 +129,7 @@ public class RangedAttackComponent : MonoBehaviour
 
     void PlayShotSound()
     {
-        if (_audioSource == null || data == null || data.shotClip == null) return;
+        if (_audioSource == null || _shotClips == null || _shotClips.Length == 0) return;
 
         // Distance cull: skip audio if too far from Commander to keep voice count manageable
         if (CommanderController.Instance != null)
@@ -119,8 +138,9 @@ public class RangedAttackComponent : MonoBehaviour
             if (sqrDist > GameConstants.SHOT_AUDIO_MAX_DISTANCE * GameConstants.SHOT_AUDIO_MAX_DISTANCE) return;
         }
 
+        AudioClip clip = _shotClips[UnityEngine.Random.Range(0, _shotClips.Length)];
         _audioSource.pitch = 1f + UnityEngine.Random.Range(-GameConstants.SHOT_AUDIO_PITCH_VARIANCE, GameConstants.SHOT_AUDIO_PITCH_VARIANCE);
-        _audioSource.PlayOneShot(data.shotClip);
+        _audioSource.PlayOneShot(clip, data.shotVolume);
     }
 
     void SpawnProjectile(Vector3 direction)

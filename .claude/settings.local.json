@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls -la \"D:\\\\projetos\\\\skirmish-commander-survivor\\\\Assets\\\\_Project\"\" | grep -E \"Data)",
+      "Bash(Audio \")",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

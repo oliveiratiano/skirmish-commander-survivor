@@ -72,6 +72,7 @@ public class CommandSystem : MonoBehaviour
         bool filterByPrompt = prompted != null && prompted.Count > 0;
         UnitData[] playerTypes = GameManager.Instance != null ? GameManager.Instance.playerUnitTypes : null;
 
+        int receiverCount = 0;
         for (int i = 0; i < UnitAIController.AllPlayerUnits.Count; i++)
         {
             var u = UnitAIController.AllPlayerUnits[i];
@@ -85,6 +86,13 @@ public class CommandSystem : MonoBehaviour
                     continue;
             }
             u.ReceiveCommand(newState, withRelay);
+            receiverCount++;
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayCommandShout(newState);
+            AudioManager.Instance.PlayUnitResponse(receiverCount);
         }
 
         if (CommanderController.Instance != null)

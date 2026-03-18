@@ -4,10 +4,7 @@ public class MusicManager : MonoBehaviour
 {
     public static MusicManager Instance { get; private set; }
 
-    [Header("Stage 1 (Swarm Swamp Arena)")]
-    [Tooltip("BGM for the first stage. Assign from Assets/_Project/Audio/Music/Stage1/ or place Stage1_BGM in Resources/Audio/")]
-    public AudioClip stage1BGM;
-
+    // Loaded from Resources/Audio/Stage1_BGM. See docs/audio-file-conventions.md.
     const string STAGE1_BGM_RESOURCES_PATH = "Audio/Stage1_BGM";
 
     AudioSource _source;
@@ -92,9 +89,7 @@ public class MusicManager : MonoBehaviour
     {
         if (_source == null) return;
 
-        AudioClip clip = stage1BGM;
-        if (clip == null)
-            clip = Resources.Load<AudioClip>(STAGE1_BGM_RESOURCES_PATH);
+        AudioClip clip = Resources.Load<AudioClip>(STAGE1_BGM_RESOURCES_PATH);
 
         if (clip == null) return;
         if (_source.clip == clip && _source.isPlaying) return;

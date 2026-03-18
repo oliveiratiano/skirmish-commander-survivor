@@ -497,38 +497,44 @@ public class UnitAIController : MonoBehaviour
 
         if (shouldRetreat)
         {
+            // Always move toward allies — never lock in place to shoot.
+            // Fire on the move if a threat is within range.
             float dist = (nearestThreat.position - transform.position).magnitude;
             if (data != null && dist <= data.range)
-            {
-                _movementLocked = true;
-                _movement.Stop();
                 UpdateShootPrepInRange();
+            else
+                ClearShootPrepState();
+
+            _movementLocked = false;
+
+            Vector3 centroid = GetSwarmCentroid(GameConstants.SWARM_COUNT_RADIUS);
+            Vector3 dir;
+            if (centroid.sqrMagnitude > 0.001f)
+            {
+                Vector3 toCentroid = centroid - transform.position;
+                if (toCentroid.sqrMagnitude > 1f)
+                    dir = toCentroid.normalized;
+                else
+                {
+                    // Already at centroid — move away from nearest threat instead
+                    dir = (transform.position - nearestThreat.position).normalized;
+                }
             }
             else
             {
-                ClearShootPrepState();
-                _movementLocked = false;
-                Transform nearestAlly = FindNearest(AllEnemyUnits);
-                Vector3 dir;
-                if (nearestAlly != null)
-                {
-                    dir = (nearestAlly.position - transform.position).normalized;
-                }
-                else
-                {
-                    Vector3 awayFromThreat = (transform.position - nearestThreat.position).normalized;
-                    dir = awayFromThreat;
-                }
-                if (dir.sqrMagnitude >= 0.01f)
-                {
-                    float jitter = (Random.value - 0.5f) * 10f * Mathf.Deg2Rad;
-                    dir = new Vector3(dir.x * Mathf.Cos(jitter) - dir.y * Mathf.Sin(jitter),
-                        dir.x * Mathf.Sin(jitter) + dir.y * Mathf.Cos(jitter), 0f);
-                    _movement.Move(dir * GameConstants.SWARM_RETREAT_URGENCY);
-                }
-                else
-                    _movement.Stop();
+                // No allies found — flee from threat
+                dir = (transform.position - nearestThreat.position).normalized;
             }
+
+            if (dir.sqrMagnitude >= 0.01f)
+            {
+                float jitter = (Random.value - 0.5f) * 10f * Mathf.Deg2Rad;
+                dir = new Vector3(dir.x * Mathf.Cos(jitter) - dir.y * Mathf.Sin(jitter),
+                    dir.x * Mathf.Sin(jitter) + dir.y * Mathf.Cos(jitter), 0f);
+                _movement.Move(dir * GameConstants.SWARM_RETREAT_URGENCY);
+            }
+            else
+                _movement.Stop();
         }
         else
         {
@@ -730,6 +736,32 @@ public class UnitAIController : MonoBehaviour
         }
 
         return count;
+    }
+
+    // Returns the average position of nearby allies (excluding self).
+    // Returns Vector3.zero if no allies found.
+    Vector3 GetSwarmCentroid(float radius)
+    {
+        float r2 = radius * radius;
+        Vector3 pos = transform.position;
+        Vector3 sum = Vector3.zero;
+        int count = 0;
+
+        for (int i = 0; i < AllEnemyUnits.Count; i++)
+        {
+            if (AllEnemyUnits[i] == null || AllEnemyUnits[i] == this) continue;
+            if (!AllEnemyUnits[i].gameObject.activeInHierarchy) continue;
+            var h = AllEnemyUnits[i].GetComponent<HealthComponent>();
+            if (h != null && h.IsDead) continue;
+            Vector3 allyPos = AllEnemyUnits[i].transform.position;
+            if ((allyPos - pos).sqrMagnitude <= r2)
+            {
+                sum += allyPos;
+                count++;
+            }
+        }
+
+        return count > 0 ? sum / count : Vector3.zero;
     }
 
     Transform FindNearest(System.Collections.Generic.List<UnitAIController> list)

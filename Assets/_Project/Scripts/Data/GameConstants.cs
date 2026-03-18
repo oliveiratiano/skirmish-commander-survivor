@@ -18,6 +18,8 @@ public static class GameConstants
     public const float SWARM_COUNT_RADIUS = 14f;
     public const int SWARM_ENGAGE_THRESHOLD = 3;
     public const float SWARM_RETREAT_URGENCY = 0.9f;
+    public const float MIN_SPAWN_DISTANCE_FROM_COMMANDER = 20f;
+    public const int SPAWN_POSITION_MAX_RETRIES = 10;
     public const int DRAFT_BUDGET = 150;
     public const float WAVE_DURATION = 180f;
     public const float SPAWN_RATE_INCREASE_INTERVAL = 30f;
@@ -38,6 +40,12 @@ public static class GameConstants
     // Audio
     public const float SHOT_AUDIO_PITCH_VARIANCE = 0.08f; // ±8% random pitch per shot
     public const float SHOT_AUDIO_MAX_DISTANCE = 25f;     // skip audio beyond this distance from Commander
+    public const float COMMAND_AUDIO_VOLUME = 1.0f;
+    public const float COMMAND_AUDIO_PITCH_VARIANCE = 0.05f; // ±5% random pitch per command shout
+    public const int RESPONSE_TIER_1_THRESHOLD = 4;  // fewer than this → tier 1 (small group)
+    public const int RESPONSE_TIER_2_THRESHOLD = 9;  // fewer than this → tier 2 (medium group); ≥ this → tier 3
+    public const float ENEMY_DEATH_SOUND_COOLDOWN = 0.08f; // min seconds between enemy death sounds
+    public const float HIT_SOUND_COOLDOWN = 0.15f;         // min seconds between hit sounds per unit
     public const float COMMANDER_RADIUS = 2.5f;
 
     // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.
