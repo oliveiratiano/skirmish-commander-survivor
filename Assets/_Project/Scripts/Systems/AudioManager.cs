@@ -3,7 +3,19 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance { get; private set; }
+    static AudioManager _instance;
+    public static AudioManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                var go = new GameObject("AudioManager");
+                _instance = go.AddComponent<AudioManager>();
+            }
+            return _instance;
+        }
+    }
 
     // Loaded at startup from Resources/Audio/SFX/ by naming convention.
     // See docs/audio-file-conventions.md for folder layout and file naming rules.
@@ -16,22 +28,21 @@ public class AudioManager : MonoBehaviour
     AudioClip[] _responseTier2Clips;
     AudioClip[] _responseTier3Clips;
 
-    AudioClip[] _deathPlayerClips;
-    AudioClip[] _deathEnemyClips;
+    Dictionary<string, AudioClip[]> _deathClipsByUnit = new Dictionary<string, AudioClip[]>();
     AudioClip[] _hitPlayerClips;
     AudioClip[] _hitEnemyClips;
 
     // _uiSource: 2D, for command shouts and unit responses (not positional)
     AudioSource _uiSource;
-    // _spatialSource: 3D, repositioned per call, for death and impact sounds
+    // _spatialSource: 2D, for death and impact sounds (kept separate so pitch changes don't affect UI)
     AudioSource _spatialSource;
 
     float _lastEnemyDeathSoundTime = -999f;
 
     void Awake()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
+        if (_instance != null && _instance != this) { Destroy(gameObject); return; }
+        _instance = this;
 
         var sources = GetComponents<AudioSource>();
         _uiSource     = sources.Length > 0 ? sources[0] : gameObject.AddComponent<AudioSource>();
@@ -41,10 +52,7 @@ public class AudioManager : MonoBehaviour
         _uiSource.playOnAwake  = false;
         _uiSource.loop         = false;
 
-        _spatialSource.spatialBlend  = 1f;
-        _spatialSource.rolloffMode   = AudioRolloffMode.Linear;
-        _spatialSource.minDistance   = 3f;
-        _spatialSource.maxDistance   = GameConstants.SHOT_AUDIO_MAX_DISTANCE;
+        _spatialSource.spatialBlend  = 0f;
         _spatialSource.playOnAwake   = false;
         _spatialSource.loop          = false;
 
@@ -53,8 +61,8 @@ public class AudioManager : MonoBehaviour
 
     void OnDestroy()
     {
-        if (Instance == this)
-            Instance = null;
+        if (_instance == this)
+            _instance = null;
     }
 
     // -------------------------------------------------------------------------
@@ -73,12 +81,14 @@ public class AudioManager : MonoBehaviour
 
     // Called by UnitAIController.HandleDeath() — plays from AudioManager's own source
     // so the clip is not cut off when the unit's GameObject is deactivated.
-    public void PlayDeathSound(bool isEnemy, Vector3 position)
+    // Each unit type gets its own death clips loaded by naming convention:
+    //   Audio/SFX/Deaths/death_{sanitized_unit_name}_{0,1,...}
+    public void PlayDeathSound(bool isEnemy, string unitName, Vector3 position)
     {
         if (isEnemy && Time.time - _lastEnemyDeathSoundTime < GameConstants.ENEMY_DEATH_SOUND_COOLDOWN)
             return;
 
-        AudioClip clip = PickRandom(isEnemy ? _deathEnemyClips : _deathPlayerClips);
+        AudioClip clip = PickRandom(GetDeathClips(unitName));
         if (clip == null) return;
 
         PlaySpatial(clip, position, GameConstants.SHOT_AUDIO_PITCH_VARIANCE);
@@ -109,9 +119,6 @@ public class AudioManager : MonoBehaviour
         _responseTier2Clips = LoadClips("Audio/SFX/Responses/response_tier2");
         _responseTier3Clips = LoadClips("Audio/SFX/Responses/response_tier3");
 
-        _deathPlayerClips = LoadClips("Audio/SFX/Deaths/death_player");
-        _deathEnemyClips  = LoadClips("Audio/SFX/Deaths/death_enemy");
-
         _hitPlayerClips = LoadClips("Audio/SFX/Hits/hit_player");
         _hitEnemyClips  = LoadClips("Audio/SFX/Hits/hit_enemy");
     }
@@ -127,6 +134,21 @@ public class AudioManager : MonoBehaviour
             list.Add(clip);
         }
         return list.ToArray();
+    }
+
+    AudioClip[] GetDeathClips(string unitName)
+    {
+        if (string.IsNullOrEmpty(unitName)) return null;
+        string key = SanitizeName(unitName);
+        if (_deathClipsByUnit.TryGetValue(key, out var cached)) return cached;
+        var clips = LoadClips($"Audio/SFX/Deaths/death_{key}");
+        _deathClipsByUnit[key] = clips;
+        return clips;
+    }
+
+    static string SanitizeName(string name)
+    {
+        return name.ToLower().Replace(" ", "_").Replace("-", "_");
     }
 
     AudioClip[] ClipsForCommand(CommandState state)
@@ -158,7 +180,12 @@ public class AudioManager : MonoBehaviour
 
     void PlaySpatial(AudioClip clip, Vector3 position, float pitchVariance)
     {
-        _spatialSource.transform.position = position;
+        if (CommanderController.Instance != null)
+        {
+            float sqrDist = (position - CommanderController.Instance.transform.position).sqrMagnitude;
+            if (sqrDist > GameConstants.SHOT_AUDIO_MAX_DISTANCE * GameConstants.SHOT_AUDIO_MAX_DISTANCE) return;
+        }
+
         _spatialSource.pitch = 1f + Random.Range(-pitchVariance, pitchVariance);
         _spatialSource.PlayOneShot(clip);
     }

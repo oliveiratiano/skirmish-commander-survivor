@@ -214,6 +214,9 @@ public static class ProjectSetup
         GameObject flowGO = CreateEmpty("GameFlowManager");
         flowGO.AddComponent<GameFlowManager>();
 
+        GameObject audioGO = CreateEmpty("AudioManager");
+        audioGO.AddComponent<AudioManager>();
+
         GameObject musicGO = CreateEmpty("MusicManager");
         musicGO.AddComponent<AudioSource>();
         musicGO.AddComponent<MusicManager>();

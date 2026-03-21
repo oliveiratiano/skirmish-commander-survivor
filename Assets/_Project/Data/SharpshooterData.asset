@@ -105,3 +105,4 @@ MonoBehaviour:
   projectileSpeed: 50
   projectileLifetime: 2
   projectileColor: {r: 1, g: 0.4, b: 1, a: 1}
+  shotVolume: 1
