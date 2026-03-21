@@ -14,9 +14,9 @@ public class WaveManager : MonoBehaviour
     public UnitData bossData;
     [Tooltip("Escort swarm bugs that form up around the boss. Fallback to enemyData with 30% speed if null.")]
     public UnitData escortData;
-    public int totalEnemies = 180;
-    public float baseSpawnInterval = 1.5f;
-    public float minSpawnInterval = 0.2f;
+    public int totalEnemies = 216;
+    public float baseSpawnInterval = 1.25f;
+    public float minSpawnInterval = 0.17f;
 
     int _spawnedCount;
     int _killedCount;

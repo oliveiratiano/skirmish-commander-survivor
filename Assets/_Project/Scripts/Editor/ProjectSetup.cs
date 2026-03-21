@@ -207,9 +207,9 @@ public static class ProjectSetup
         wm.enemyData = swarmBug;
         wm.bossData = swarmBugBoss;
         wm.escortData = swarmBugEscort;
-        wm.totalEnemies = 100;
-        wm.baseSpawnInterval = 1.5f;
-        wm.minSpawnInterval = 0.2f;
+        wm.totalEnemies = 216;
+        wm.baseSpawnInterval = 1.25f;
+        wm.minSpawnInterval = 0.17f;
 
         GameObject flowGO = CreateEmpty("GameFlowManager");
         flowGO.AddComponent<GameFlowManager>();

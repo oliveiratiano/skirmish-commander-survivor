@@ -3,7 +3,30 @@
     "allow": [
       "Bash(ls -la \"D:\\\\projetos\\\\skirmish-commander-survivor\\\\Assets\\\\_Project\"\" | grep -E \"Data)",
       "Bash(Audio \")",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(cp \"D:/projetos/skirmish-commander-survivor/.claude/skills/qa/SKILL.md\" \"$HOME/.claude/skills/qa/SKILL.md\")",
+      "Bash(rm \"D:/projetos/skirmish-commander-survivor/.claude/skills/qa/SKILL.md\")",
+      "Bash(rmdir \"D:/projetos/skirmish-commander-survivor/.claude/skills/qa\")",
+      "Bash(rmdir \"D:/projetos/skirmish-commander-survivor/.claude/skills\")",
+      "Bash(sed 's/.*death_//')",
+      "Bash(sed 's/_[0-9]*\\\\.wav//')",
+      "Bash(grep \"unitName.*=\" /d/projetos/skirmish-commander-survivor/Assets/_Project/Data/*Data.asset)",
+      "Bash(grep \"unitName:\" /d/projetos/skirmish-commander-survivor/Assets/_Project/Data/*Data.asset)",
+      "Bash(sed 's/.*unitName: //')",
+      "Bash(sed 's/\\\\.wav$//')",
+      "Bash(grep -E \"^\\\\+.*//|^\\\\+.*death|^\\\\-.*death\")",
+      "Bash(grep:*)",
+      "Bash(cp death_close_quarters_0.wav death_sharpshooter_0.wav)",
+      "Bash(cp death_close_quarters_1.wav death_sharpshooter_1.wav)",
+      "Bash(cp death_close_quarters_2.wav death_sharpshooter_2.wav)",
+      "Bash(cp death_close_quarters_0.wav death_machine_gunner_0.wav)",
+      "Bash(cp death_close_quarters_1.wav death_machine_gunner_1.wav)",
+      "Bash(cd:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)",
+      "Bash(git stash:*)",
+      "Bash(git push:*)"
     ]
   }
 }
