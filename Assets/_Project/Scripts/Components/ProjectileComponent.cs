@@ -59,6 +59,7 @@ public class ProjectileComponent : MonoBehaviour
                     if (health != null && !health.IsDead)
                     {
                         health.TakeDamage(damage);
+                        AudioManager.Instance.PlayHitSound(true, enemy.transform.position);
                         ReturnToPool();
                         return;
                     }
@@ -80,6 +81,7 @@ public class ProjectileComponent : MonoBehaviour
                     if (health != null && !health.IsDead)
                     {
                         health.TakeDamage(damage);
+                        AudioManager.Instance.PlayHitSound(false, unit.transform.position);
                         ReturnToPool();
                         return;
                     }
@@ -96,6 +98,7 @@ public class ProjectileComponent : MonoBehaviour
                     if (health != null && !health.IsDead)
                     {
                         health.TakeDamage(damage);
+                        AudioManager.Instance.PlayHitSound(false, CommanderController.Instance.transform.position);
                         ReturnToPool();
                         return;
                     }

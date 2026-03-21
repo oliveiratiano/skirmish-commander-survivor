@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
 ### Added
+- Placeholder audio files for commands (attack, standground, regroup, follow), unit responses (3 tiers), and hit sounds (player/enemy) — 2 variants each for random variation
+- Hit sound playback: ProjectileComponent now calls `AudioManager.PlayHitSound()` on projectile impact, with global cooldown throttling
 - Commander sprite sheet support: optional `commanderSprites` (12 frames) on GameManager; when set, Commander uses SpriteRenderer and SpriteSheetAnimator (idle 0–2, walk 3–8, shoot 9–10); fallback to colored quad when unset.
 - Project documentation scaffolding (SPEC, ADR-001, README, CHANGELOG)
 - M1: Unity project structure, Commander movement (WASD), flat arena, orthographic camera with dynamic zoom, F3 debug overlay

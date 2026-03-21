@@ -38,6 +38,7 @@ public class AudioManager : MonoBehaviour
     AudioSource _spatialSource;
 
     float _lastEnemyDeathSoundTime = -999f;
+    float _lastHitSoundTime = -999f;
 
     void Awake()
     {
@@ -99,9 +100,13 @@ public class AudioManager : MonoBehaviour
 
     public void PlayHitSound(bool isEnemy, Vector3 position)
     {
+        if (Time.time - _lastHitSoundTime < GameConstants.HIT_SOUND_COOLDOWN)
+            return;
+
         AudioClip clip = PickRandom(isEnemy ? _hitEnemyClips : _hitPlayerClips);
         if (clip == null) return;
         PlaySpatial(clip, position, GameConstants.SHOT_AUDIO_PITCH_VARIANCE);
+        _lastHitSoundTime = Time.time;
     }
 
     // -------------------------------------------------------------------------
