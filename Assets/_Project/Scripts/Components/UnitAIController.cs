@@ -507,23 +507,20 @@ public class UnitAIController : MonoBehaviour
 
             _movementLocked = false;
 
-            Vector3 centroid = GetSwarmCentroid(GameConstants.SWARM_COUNT_RADIUS);
+            Vector3 awayFromThreat = (transform.position - nearestThreat.position).normalized;
+            Transform nearestAlly = FindNearest(AllEnemyUnits);
             Vector3 dir;
-            if (centroid.sqrMagnitude > 0.001f)
+            if (nearestAlly != null)
             {
-                Vector3 toCentroid = centroid - transform.position;
-                if (toCentroid.sqrMagnitude > 1f)
-                    dir = toCentroid.normalized;
-                else
-                {
-                    // Already at centroid — move away from nearest threat instead
-                    dir = (transform.position - nearestThreat.position).normalized;
-                }
+                Vector3 toAlly = (nearestAlly.position - transform.position).normalized;
+                // Only move toward ally if it doesn't lead through the threat.
+                // dot > -0.3 means the ally is behind, to the side, or slightly forward.
+                float dot = Vector3.Dot(toAlly, awayFromThreat);
+                dir = dot > -0.3f ? toAlly : awayFromThreat;
             }
             else
             {
-                // No allies found — flee from threat
-                dir = (transform.position - nearestThreat.position).normalized;
+                dir = awayFromThreat;
             }
 
             if (dir.sqrMagnitude >= 0.01f)
@@ -531,6 +528,8 @@ public class UnitAIController : MonoBehaviour
                 float jitter = (Random.value - 0.5f) * 10f * Mathf.Deg2Rad;
                 dir = new Vector3(dir.x * Mathf.Cos(jitter) - dir.y * Mathf.Sin(jitter),
                     dir.x * Mathf.Sin(jitter) + dir.y * Mathf.Cos(jitter), 0f);
+                if (!_immuneToBoundaryDamage)
+                    dir = GetRetreatDirectionAvoidingDangerZone(transform.position, dir);
                 _movement.Move(dir * GameConstants.SWARM_RETREAT_URGENCY);
             }
             else
@@ -550,6 +549,8 @@ public class UnitAIController : MonoBehaviour
                 ClearShootPrepState();
                 _movementLocked = false;
                 Vector3 dir = (nearestThreat.position - transform.position).normalized;
+                if (!_immuneToBoundaryDamage)
+                    dir = GetRetreatDirectionAvoidingDangerZone(transform.position, dir);
                 _movement.Move(dir);
             }
         }
@@ -738,32 +739,6 @@ public class UnitAIController : MonoBehaviour
         return count;
     }
 
-    // Returns the average position of nearby allies (excluding self).
-    // Returns Vector3.zero if no allies found.
-    Vector3 GetSwarmCentroid(float radius)
-    {
-        float r2 = radius * radius;
-        Vector3 pos = transform.position;
-        Vector3 sum = Vector3.zero;
-        int count = 0;
-
-        for (int i = 0; i < AllEnemyUnits.Count; i++)
-        {
-            if (AllEnemyUnits[i] == null || AllEnemyUnits[i] == this) continue;
-            if (!AllEnemyUnits[i].gameObject.activeInHierarchy) continue;
-            var h = AllEnemyUnits[i].GetComponent<HealthComponent>();
-            if (h != null && h.IsDead) continue;
-            Vector3 allyPos = AllEnemyUnits[i].transform.position;
-            if ((allyPos - pos).sqrMagnitude <= r2)
-            {
-                sum += allyPos;
-                count++;
-            }
-        }
-
-        return count > 0 ? sum / count : Vector3.zero;
-    }
-
     Transform FindNearest(System.Collections.Generic.List<UnitAIController> list)
     {
         Transform best = null;
@@ -843,6 +818,9 @@ public class UnitAIController : MonoBehaviour
 
     void HandleDeath()
     {
+        if (AudioManager.Instance != null)
+            AudioManager.Instance.PlayDeathSound(!IsPlayerUnit, data != null ? data.unitName : null, transform.position);
+
         if (!IsPlayerUnit && ObjectPool.Instance != null)
         {
             AllEnemyUnits.Remove(this);

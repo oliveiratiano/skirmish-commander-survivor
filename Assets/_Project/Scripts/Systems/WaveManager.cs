@@ -245,6 +245,19 @@ public class WaveManager : MonoBehaviour
         x = Mathf.Clamp(x, -half, half);
         y = Mathf.Clamp(y, -half, half);
 
+        // Ensure spawn lands outside the safe zone so enemies never pop up on allied units.
+        float safe = GameConstants.ARENA_SAFE_HALF_SIZE;
+        if (Mathf.Abs(x) <= safe && Mathf.Abs(y) <= safe)
+        {
+            // Push the axis closest to the safe boundary outward.
+            float dx = safe - Mathf.Abs(x);
+            float dy = safe - Mathf.Abs(y);
+            if (dx <= dy)
+                x = (x >= 0f ? 1f : -1f) * (safe + 1f);
+            else
+                y = (y >= 0f ? 1f : -1f) * (safe + 1f);
+        }
+
         return new Vector3(x, y, 0f);
     }
 
