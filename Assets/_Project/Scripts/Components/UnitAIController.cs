@@ -688,7 +688,8 @@ public class UnitAIController : MonoBehaviour
 
         if (toCommander.magnitude > perimeterRadius)
         {
-            _movement.Move(toCommander.normalized * urgency);
+            Vector3 dir = ClampDirectionToSafeZone(transform.position, toCommander.normalized);
+            _movement.Move(dir * urgency);
         }
         else
         {
@@ -827,8 +828,23 @@ public class UnitAIController : MonoBehaviour
         if (neighbors > 0)
         {
             avoidance /= neighbors;
-            transform.position += avoidance * _movement.moveSpeed * 0.5f * Time.deltaTime;
+            Vector3 dir = ClampDirectionToSafeZone(transform.position, avoidance);
+            _movement.Move(dir * 0.5f);
         }
+    }
+
+    Vector3 ClampDirectionToSafeZone(Vector3 from, Vector3 dir)
+    {
+        float safe = GameConstants.ARENA_SAFE_HALF_SIZE;
+        float step = 1f;
+        Vector3 candidate = from + dir * step;
+
+        if (Mathf.Abs(candidate.x) > safe)
+            dir.x = 0f;
+        if (Mathf.Abs(candidate.y) > safe)
+            dir.y = 0f;
+
+        return dir;
     }
 
     void HandleDeath()
