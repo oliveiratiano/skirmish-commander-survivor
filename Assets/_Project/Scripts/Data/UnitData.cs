@@ -34,6 +34,10 @@ public class UnitData : ScriptableObject
     [Tooltip("When > 0 and burstCount > 1, fire all bullets in a spray arc (total degrees).")]
     public float sprayArcDegrees;
 
+    [Tooltip("How much to lead moving targets (0 = none, 1 = full prediction). Spread cone still applies on top.")]
+    [Range(0f, 1f)]
+    public float leadFactor = 0.6f;
+
     [Header("Projectile")]
     public float projectileSpeed = 15f;
     public float projectileLifetime = 2f;

@@ -493,8 +493,21 @@ public class UnitAIController : MonoBehaviour
         int swarmCount = CountSwarmInRadius(radius);
         int engageThreshold = Mathf.Max(1, GameConstants.SWARM_ENGAGE_THRESHOLD + _swarmThresholdOffset);
 
-        // Desperation: when very few enemies remain globally, force attack
-        bool desperation = AllEnemyUnits.Count <= GameConstants.SWARM_DESPERATION_THRESHOLD;
+        // While still immune (just spawned outside safe zone), prioritize entering the arena
+        if (_immuneToBoundaryDamage)
+        {
+            ClearShootPrepState();
+            _movementLocked = false;
+            Vector3 toCenter = -transform.position;
+            toCenter.z = 0f;
+            if (toCenter.sqrMagnitude > 0.01f)
+                _movement.Move(toCenter.normalized);
+            return;
+        }
+
+        // Desperation: force engage when few enemies remain or wave timer is almost up
+        bool enraged = GameFlowManager.Instance != null && GameFlowManager.Instance.Timer <= GameConstants.SWARM_ENRAGE_TIME_LEFT;
+        bool desperation = enraged || AllEnemyUnits.Count <= GameConstants.SWARM_DESPERATION_THRESHOLD;
         bool shouldRetreat = !desperation && (playerCount > swarmCount || swarmCount < engageThreshold);
 
         if (shouldRetreat)

@@ -102,7 +102,7 @@ public class RangedAttackComponent : MonoBehaviour
         Transform target = FindTarget();
         if (target == null) return;
 
-        Vector3 toTarget = (target.position - transform.position).normalized;
+        Vector3 toTarget = GetLeadDirection(target);
         float deviation = UnityEngine.Random.Range(-data.accuracySpreadDegrees, data.accuracySpreadDegrees);
         Vector3 direction = Quaternion.Euler(0f, 0f, deviation) * toTarget;
 
@@ -114,7 +114,7 @@ public class RangedAttackComponent : MonoBehaviour
         Transform target = FindTarget();
         if (target == null) return;
 
-        Vector3 toTarget = (target.position - transform.position).normalized;
+        Vector3 toTarget = GetLeadDirection(target);
         float halfArc = arcDegrees * 0.5f;
         float step = count > 1 ? arcDegrees / (count - 1) : 0f;
 
@@ -125,6 +125,22 @@ public class RangedAttackComponent : MonoBehaviour
             Vector3 direction = Quaternion.Euler(0f, 0f, angle + deviation) * toTarget;
             SpawnProjectile(direction);
         }
+    }
+
+    Vector3 GetLeadDirection(Transform target)
+    {
+        Vector3 toTarget = target.position - transform.position;
+        float dist = toTarget.magnitude;
+        if (dist < 0.01f) return toTarget.normalized;
+
+        var movement = target.GetComponent<MovementComponent>();
+        if (movement == null || data.leadFactor <= 0f || data.projectileSpeed <= 0f)
+            return toTarget.normalized;
+
+        float timeToHit = dist / data.projectileSpeed;
+        Vector3 predicted = target.position + movement.Velocity * timeToHit;
+        Vector3 aimPoint = Vector3.Lerp(target.position, predicted, data.leadFactor);
+        return (aimPoint - transform.position).normalized;
     }
 
     void PlayShotSound()
