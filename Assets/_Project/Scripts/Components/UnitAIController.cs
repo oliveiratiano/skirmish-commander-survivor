@@ -29,6 +29,7 @@ public class UnitAIController : MonoBehaviour
     float _shootPrepTimer;
     const float SHOOT_PREP_DURATION = 0.5f;
     ShootPrepPhase _shootPrepPhase = ShootPrepPhase.OutOfRange;
+    Transform _shootPrepTarget;
 
     float _bossMoveTimer;
     Vector3 _bossMoveDir;
@@ -258,10 +259,19 @@ public class UnitAIController : MonoBehaviour
 
     void HandleStandGround()
     {
+        if (IsShootPrepCommitted())
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
+
         bool enemyInRange = false;
+        Transform nearest = null;
         if (_attack != null && data != null)
         {
-            Transform nearest = FindNearest(AllEnemyUnits);
+            nearest = FindNearest(AllEnemyUnits);
             if (nearest != null)
             {
                 float dist = (nearest.position - transform.position).magnitude;
@@ -273,7 +283,7 @@ public class UnitAIController : MonoBehaviour
         {
             _movementLocked = true;
             _movement.Stop();
-            UpdateShootPrepInRange();
+            UpdateShootPrepInRange(nearest);
         }
         else
         {
@@ -316,6 +326,14 @@ public class UnitAIController : MonoBehaviour
 
     void HandleAttack()
     {
+        if (IsShootPrepCommitted())
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
+
         Transform nearest = UseCommanderTargeting
             ? FindNearestEnemyToCommander()
             : FindNearest(AllEnemyUnits);
@@ -333,7 +351,7 @@ public class UnitAIController : MonoBehaviour
         {
             _movementLocked = true;
             _movement.Stop();
-            UpdateShootPrepInRange();
+            UpdateShootPrepInRange(nearest);
         }
         else if (dist < minShoot)
         {
@@ -362,10 +380,19 @@ public class UnitAIController : MonoBehaviour
             return;
         }
 
+        if (IsShootPrepCommitted())
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
+
         bool enemyInRange = false;
+        Transform nearest = null;
         if (_attack != null && data != null)
         {
-            Transform nearest = FindNearest(AllEnemyUnits);
+            nearest = FindNearest(AllEnemyUnits);
             if (nearest != null)
             {
                 float dist = (nearest.position - transform.position).magnitude;
@@ -377,7 +404,7 @@ public class UnitAIController : MonoBehaviour
         {
             _movementLocked = true;
             _movement.Stop();
-            UpdateShootPrepInRange();
+            UpdateShootPrepInRange(nearest);
         }
         else
         {
@@ -431,6 +458,14 @@ public class UnitAIController : MonoBehaviour
             return;
         }
 
+        if (IsShootPrepCommitted())
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
+
         Vector3 commanderPos = CommanderController.Instance.transform.position;
         float dist = (commanderPos - transform.position).magnitude;
 
@@ -438,7 +473,7 @@ public class UnitAIController : MonoBehaviour
         {
             _movementLocked = true;
             _movement.Stop();
-            UpdateShootPrepInRange();
+            UpdateShootPrepInRange(CommanderController.Instance.transform);
             return;
         }
 
@@ -484,10 +519,19 @@ public class UnitAIController : MonoBehaviour
             return;
         }
 
+        if (IsShootPrepCommitted())
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
+
         bool playerInRange = false;
+        Transform nearest = null;
         if (_attack != null && data != null)
         {
-            Transform nearest = FindNearestAnyUnit();
+            nearest = FindNearestAnyUnit();
             if (nearest != null)
             {
                 float dist = (nearest.position - transform.position).magnitude;
@@ -499,7 +543,7 @@ public class UnitAIController : MonoBehaviour
         {
             _movementLocked = true;
             _movement.Stop();
-            UpdateShootPrepInRange();
+            UpdateShootPrepInRange(nearest);
         }
         else
         {
@@ -513,6 +557,15 @@ public class UnitAIController : MonoBehaviour
     {
         if (_attack != null)
             _attack.enabled = true;
+
+        // If committed to a shot, finish it regardless of range changes
+        if (IsShootPrepCommitted())
+        {
+            _movementLocked = true;
+            _movement.Stop();
+            UpdateShootPrepInRange();
+            return;
+        }
 
         Transform nearestThreat = FindNearestAnyUnit();
         if (nearestThreat == null)
@@ -552,7 +605,7 @@ public class UnitAIController : MonoBehaviour
             // Fire on the move if a threat is within range.
             float dist = (nearestThreat.position - transform.position).magnitude;
             if (data != null && dist <= data.range)
-                UpdateShootPrepInRange();
+                UpdateShootPrepInRange(nearestThreat);
             else
                 ClearShootPrepState();
 
@@ -592,7 +645,7 @@ public class UnitAIController : MonoBehaviour
             {
                 _movementLocked = true;
                 _movement.Stop();
-                UpdateShootPrepInRange();
+                UpdateShootPrepInRange(nearestThreat);
             }
             else
             {
@@ -630,7 +683,16 @@ public class UnitAIController : MonoBehaviour
         return best;
     }
 
-    void UpdateShootPrepInRange()
+    bool IsShootPrepCommitted()
+    {
+        if (_shootPrepPhase == ShootPrepPhase.OutOfRange) return false;
+        if (_shootPrepTarget == null || !_shootPrepTarget.gameObject.activeInHierarchy) return false;
+        var h = _shootPrepTarget.GetComponent<HealthComponent>();
+        if (h != null && h.IsDead) return false;
+        return true;
+    }
+
+    void UpdateShootPrepInRange(Transform target = null)
     {
         if (_attack == null) return;
 
@@ -638,6 +700,7 @@ public class UnitAIController : MonoBehaviour
         {
             _shootPrepPhase = ShootPrepPhase.Preparing;
             _shootPrepTimer = SHOOT_PREP_DURATION;
+            _shootPrepTarget = target;
             _attack.CanFire = false;
         }
 
@@ -665,6 +728,7 @@ public class UnitAIController : MonoBehaviour
     {
         _shootPrepPhase = ShootPrepPhase.OutOfRange;
         _shootPrepTimer = 0f;
+        _shootPrepTarget = null;
         if (_attack != null)
             _attack.CanFire = false;
     }
