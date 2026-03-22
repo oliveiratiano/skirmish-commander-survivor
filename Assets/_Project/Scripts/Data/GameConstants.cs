@@ -18,6 +18,8 @@ public static class GameConstants
     public const float SWARM_COUNT_RADIUS = 14f;
     public const int SWARM_ENGAGE_THRESHOLD = 3;
     public const float SWARM_RETREAT_URGENCY = 0.9f;
+    public const int SWARM_DESPERATION_THRESHOLD = 4;   // when total enemies left <= this, force engage
+    public const float SWARM_RALLY_WEIGHT = 1.5f;       // weight toward nearest ally during retreat (vs away-from-threat)
     public const float MIN_SPAWN_DISTANCE_FROM_COMMANDER = 20f;
     public const int SPAWN_POSITION_MAX_RETRIES = 10;
     public const int DRAFT_BUDGET = 150;

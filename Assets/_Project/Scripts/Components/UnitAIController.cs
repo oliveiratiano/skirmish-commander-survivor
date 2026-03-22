@@ -493,7 +493,9 @@ public class UnitAIController : MonoBehaviour
         int swarmCount = CountSwarmInRadius(radius);
         int engageThreshold = Mathf.Max(1, GameConstants.SWARM_ENGAGE_THRESHOLD + _swarmThresholdOffset);
 
-        bool shouldRetreat = playerCount > swarmCount || swarmCount < engageThreshold;
+        // Desperation: when very few enemies remain globally, force attack
+        bool desperation = AllEnemyUnits.Count <= GameConstants.SWARM_DESPERATION_THRESHOLD;
+        bool shouldRetreat = !desperation && (playerCount > swarmCount || swarmCount < engageThreshold);
 
         if (shouldRetreat)
         {
@@ -513,10 +515,9 @@ public class UnitAIController : MonoBehaviour
             if (nearestAlly != null)
             {
                 Vector3 toAlly = (nearestAlly.position - transform.position).normalized;
-                // Only move toward ally if it doesn't lead through the threat.
-                // dot > -0.3 means the ally is behind, to the side, or slightly forward.
-                float dot = Vector3.Dot(toAlly, awayFromThreat);
-                dir = dot > -0.3f ? toAlly : awayFromThreat;
+                // Blend retreat direction with rally toward ally, weighted to encourage regrouping.
+                // The rally weight pulls bugs together so they can meet the engage threshold.
+                dir = (awayFromThreat + toAlly * GameConstants.SWARM_RALLY_WEIGHT).normalized;
             }
             else
             {

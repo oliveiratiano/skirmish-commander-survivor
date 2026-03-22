@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com),
 and this project adheres to [Semantic Versioning](https://semver.org).
 
 ## [Unreleased]
+### Fixed
+- Swarm bugs no longer get stuck in arena corners at end of wave: added desperation engage (last few enemies charge instead of fleeing) and rally-toward-peers retreat blending so scattered bugs regroup naturally
+
 ### Added
 - Placeholder audio files for commands (attack, standground, regroup, follow), unit responses (3 tiers), and hit sounds (player/enemy) — 2 variants each for random variation
 - Hit sound playback: ProjectileComponent now calls `AudioManager.PlayHitSound()` on projectile impact, with global cooldown throttling
