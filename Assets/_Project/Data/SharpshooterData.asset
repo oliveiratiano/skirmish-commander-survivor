@@ -106,4 +106,6 @@ MonoBehaviour:
   projectileSpeed: 50
   projectileLifetime: 2
   projectileColor: {r: 1, g: 0.4, b: 1, a: 1}
+  explosionRadius: 0
+  splashDamageMultiplier: 0.5
   shotVolume: 1

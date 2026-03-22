@@ -176,7 +176,8 @@ public class RangedAttackComponent : MonoBehaviour
 
         var proj = go.GetComponent<ProjectileComponent>();
         proj.Initialize(direction, data.projectileSpeed, data.projectileLifetime,
-            data.damage, isPlayerUnit, data.projectileColor);
+            data.damage, isPlayerUnit, data.projectileColor,
+            data.explosionRadius, data.splashDamageMultiplier);
     }
 
     static void EnsurePrefab()

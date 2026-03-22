@@ -6,17 +6,22 @@ public class ProjectileComponent : MonoBehaviour
     public float lifetime;
     public float damage;
     public bool isPlayerProjectile;
+    public float explosionRadius;
+    public float splashDamageMultiplier;
 
     Vector3 _direction;
     float _timer;
 
-    public void Initialize(Vector3 direction, float speed, float lifetime, float damage, bool isPlayer, Color color)
+    public void Initialize(Vector3 direction, float speed, float lifetime, float damage, bool isPlayer, Color color,
+        float explosionRadius = 0f, float splashDamageMultiplier = 0.5f)
     {
         _direction = direction.normalized;
         this.speed = speed;
         this.lifetime = lifetime;
         this.damage = damage;
         this.isPlayerProjectile = isPlayer;
+        this.explosionRadius = explosionRadius;
+        this.splashDamageMultiplier = splashDamageMultiplier;
         _timer = 0f;
 
         Renderer r = GetComponent<Renderer>();
@@ -60,6 +65,8 @@ public class ProjectileComponent : MonoBehaviour
                     {
                         health.TakeDamage(damage);
                         AudioManager.Instance.PlayHitSound(true, enemy.transform.position);
+                        if (explosionRadius > 0f)
+                            ApplyExplosion(enemy.transform.position, enemy.gameObject);
                         ReturnToPool();
                         return;
                     }
@@ -82,6 +89,8 @@ public class ProjectileComponent : MonoBehaviour
                     {
                         health.TakeDamage(damage);
                         AudioManager.Instance.PlayHitSound(false, unit.transform.position);
+                        if (explosionRadius > 0f)
+                            ApplyExplosion(unit.transform.position, unit.gameObject);
                         ReturnToPool();
                         return;
                     }
@@ -99,12 +108,76 @@ public class ProjectileComponent : MonoBehaviour
                     {
                         health.TakeDamage(damage);
                         AudioManager.Instance.PlayHitSound(false, CommanderController.Instance.transform.position);
+                        if (explosionRadius > 0f)
+                            ApplyExplosion(CommanderController.Instance.transform.position, CommanderController.Instance.gameObject);
                         ReturnToPool();
                         return;
                     }
                 }
             }
         }
+    }
+
+    void ApplyExplosion(Vector3 center, GameObject directHitTarget)
+    {
+        SpawnExplosionEffect(center);
+
+        float sqrRadius = explosionRadius * explosionRadius;
+        float splashDmg = damage * splashDamageMultiplier;
+
+        if (isPlayerProjectile)
+        {
+            for (int i = UnitAIController.AllEnemyUnits.Count - 1; i >= 0; i--)
+            {
+                var unit = UnitAIController.AllEnemyUnits[i];
+                if (unit == null || !unit.gameObject.activeInHierarchy) continue;
+                if (unit.gameObject == directHitTarget) continue;
+
+                float dist = (unit.transform.position - center).sqrMagnitude;
+                if (dist < sqrRadius)
+                {
+                    var health = unit.GetComponent<HealthComponent>();
+                    if (health != null && !health.IsDead)
+                        health.TakeDamage(splashDmg);
+                }
+            }
+        }
+        else
+        {
+            for (int i = UnitAIController.AllPlayerUnits.Count - 1; i >= 0; i--)
+            {
+                var unit = UnitAIController.AllPlayerUnits[i];
+                if (unit == null || !unit.gameObject.activeInHierarchy) continue;
+                if (unit.gameObject == directHitTarget) continue;
+
+                float dist = (unit.transform.position - center).sqrMagnitude;
+                if (dist < sqrRadius)
+                {
+                    var health = unit.GetComponent<HealthComponent>();
+                    if (health != null && !health.IsDead)
+                        health.TakeDamage(splashDmg);
+                }
+            }
+
+            if (CommanderController.Instance != null && CommanderController.Instance.gameObject != directHitTarget)
+            {
+                float dist = (CommanderController.Instance.transform.position - center).sqrMagnitude;
+                if (dist < sqrRadius)
+                {
+                    var health = CommanderController.Instance.GetComponent<HealthComponent>();
+                    if (health != null && !health.IsDead)
+                        health.TakeDamage(splashDmg);
+                }
+            }
+        }
+    }
+
+    void SpawnExplosionEffect(Vector3 center)
+    {
+        var go = new GameObject("ExplosionEffect");
+        go.transform.position = center;
+        var effect = go.AddComponent<ExplosionEffect>();
+        effect.Initialize(explosionRadius, isPlayerProjectile);
     }
 
     void ReturnToPool()

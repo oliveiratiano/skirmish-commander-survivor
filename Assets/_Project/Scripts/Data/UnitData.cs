@@ -43,6 +43,13 @@ public class UnitData : ScriptableObject
     public float projectileLifetime = 2f;
     public Color projectileColor = Color.yellow;
 
+    [Header("Explosion")]
+    [Tooltip("Radius of AOE explosion on impact. 0 = no explosion (single target).")]
+    public float explosionRadius = 0f;
+    [Tooltip("Damage multiplier for splash targets (not the direct hit). 1.0 = full damage.")]
+    [Range(0f, 1f)]
+    public float splashDamageMultiplier = 0.5f;
+
     [Header("Audio")]
     [Tooltip("Playback volume for this unit's shot sound. 1.0 = default; 1.2 = 20% louder.")]
     public float shotVolume = 1.0f;
