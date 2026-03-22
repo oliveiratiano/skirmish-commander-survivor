@@ -242,6 +242,104 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 ---
 
+## Feature: Commander Burst Attack (Active Skill)
+
+**Goal:** Give the Commander a manually-triggered burst attack (Space key). Stores up to 10 shots with a 2s per-shot reload. Fires one shot per Space press (or hold for auto-fire at 0.3s intervals) at the closest enemy. Independent of passive auto-attack. Buzz sound if no enemy in range. HUD ammo indicator shows skill readiness at a glance.
+
+**Design decisions (locked):**
+- **Input:** Space key — one shot per press; holding Space auto-fires at 0.3s minimum interval
+- **Ammo:** 10 max, starts full. 2s reload per shot, reloads continuously while below max
+- **Reload rules:** Pauses while firing. Pauses while Commander is moving. Only reloads when idle and not firing
+- **Target:** Closest enemy to Commander
+- **Range:** Same as Commander's passive attack range
+- **Damage:** Same as passive attack damage
+- **AOE/Splash:** Same properties as passive (explosive with splash)
+- **Projectile visual:** Same color but brighter, so the player can distinguish from passive
+- **Independence:** Does not interrupt or share cooldown with passive attack
+- **No-target feedback:** Buzz sound (once per press) when no enemy in range, no ammo consumed
+- **Data:** Stats live in `CommanderActionsData` ScriptableObject — a commander-specific config for all active abilities, separate from `UnitData`
+- **HUD states:** Ammo indicator follows command-button visual style with three states:
+  - **Dimmed:** No ammo and no enemy in range — skill unusable
+  - **Loading:** Ammo below max and reloading — visual + sound cue as shots refill
+  - **Highlighted:** Has ammo and enemy in range — skill ready to use
+
+---
+
+### Slice 1: Data + Ammo System + Input Binding
+
+**What:** Create `CommanderActionsData` ScriptableObject in `Scripts/Data/` with burst attack fields: `maxAmmo = 10`, `reloadTime = 2f`, `fireInterval = 0.3f`. Create corresponding `.asset` file. Create `CommanderBurstAttack` component in `Scripts/Components/` that reads from `CommanderActionsData`, tracks ammo count and reload timer. Reload ticks only when Commander is not moving and not firing. Bind Space (press and hold) in `InputHandler`. No projectiles yet — just ammo state and input.
+
+**Files:** New `CommanderActionsData.cs`, new `CommanderActionsData.asset`, new `CommanderBurstAttack.cs`, `InputHandler.cs`
+
+**Test:** Play. Ammo starts at 10, reloads when idle. Moving stops reload. Space triggers event (debug log), deducts ammo. Holding Space deducts repeatedly at 0.3s intervals. At 0 ammo, no deduction.
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+### Slice 2: Firing Logic + Targeting
+
+**What:** On Space (or hold), if ammo > 0: find closest enemy within Commander's passive range. If found, spawn projectile toward that enemy with same damage, AOE, splash as passive — but brighter color. Deduct 1 ammo, pause reload timer. If no enemy in range, consume no ammo (buzz deferred to Slice 3). Passive `RangedAttackComponent` continues independently.
+
+**Files:** `CommanderBurstAttack.cs`
+
+**Test:** Play near enemies. Press Space — one bright projectile fires at closest enemy, explodes on hit with splash. Hold Space — stream of shots at 0.3s intervals. Passive attack keeps firing independently. Moving between shots pauses reload.
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+### Slice 3: No-Target Buzz Feedback
+
+**What:** If Space pressed with no enemy in range (or no enemies alive), play a buzz/error sound via `AudioManager`. Add method (e.g. `PlayBurstNoTarget()`). Add clip(s) following naming convention at `Resources/Audio/SFX/Skills/skill_burst_notarget_0`. No ammo consumed. Buzz plays once per press, not on hold.
+
+**Files:** `CommanderBurstAttack.cs`, `AudioManager.cs`, placeholder audio clip
+
+**Test:** Press Space with no enemies nearby. Buzz plays once. Ammo stays unchanged. Holding Space doesn't spam the buzz sound.
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+### Slice 4: HUD — Ammo Display with Readiness States
+
+**What:** Add ammo indicator to `BattleHUD` using the same visual style as command buttons. The indicator exposes the current ammo count and reload progress, with three visual states:
+- **Dimmed:** No ammo and no enemy in range — skill is unusable
+- **Loading:** Ammo below max and reloading — animated fill/progress cue plus a sound cue when each shot finishes reloading
+- **Highlighted:** Has ammo and enemy in range — skill is ready, visually prominent
+
+`CommanderBurstAttack` exposes state properties (current ammo, is reloading, enemy in range) that the HUD reads each frame to determine which visual state to show.
+
+**Files:** `BattleHUD.cs`, `CommanderBurstAttack.cs` (expose public state properties)
+
+**Test:** HUD shows dimmed when empty and no enemies. Shows loading animation and plays sound as each shot reloads. Lights up highlighted when ammo available and enemy in range. Moving stops reload and HUD reflects it. Transitions are immediate and readable during gameplay.
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
+### Slice 5: Visual + Audio Polish
+
+**What:** Burst fire sound (distinct from passive shot). Clips at `Resources/Audio/SFX/Skills/skill_burst_fire_0`. Reload-complete sound cue at `Resources/Audio/SFX/Skills/skill_burst_reload_0`. Tune brightness difference on projectile to feel right. Optional: subtle muzzle flash on burst.
+
+**Files:** `CommanderBurstAttack.cs`, `AudioManager.cs`, placeholder audio clips
+
+**Test:** Burst attack looks and sounds distinct from passive. Reload sound plays per shot recharged. Audio doesn't spam on rapid fire. Visual states, sounds, and firing all feel cohesive.
+
+| Status |
+|--------|
+| [ ] Not started |
+
+---
+
 ## Feature: Second Stage — Hive Eradication
 
 **Goal:** A second stage/mode where the player must eliminate hive(s). Enemies spawn from hives; spawn rate or count is tied to how many units are already outside the hive / in the arena (so the encounter stays manageable and design-controllable).

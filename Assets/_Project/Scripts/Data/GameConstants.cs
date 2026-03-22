@@ -52,7 +52,7 @@ public static class GameConstants
     public const float COMMANDER_RADIUS = 2.5f;
 
     // Camera
-    public const float CAMERA_BASE_SIZE = 8.4f;        // default orthographic size (30% closer than previous 12)
+    public const float CAMERA_BASE_SIZE = 9.24f;        // 10% farther than previous 8.4
     public const float CAMERA_SCROLL_MIN_SIZE = 4f;    // closest the player can zoom in
 
     // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.
@@ -61,8 +61,8 @@ public static class GameConstants
     public const float ARENA_FLOOR_TILING_V_ASPECT = 2f;
     /// <summary>Default floor texture when none is assigned in ArenaSetup. Must be in a Resources folder (e.g. Resources/tile-stage-1-moody-swampd). Fallback is grass_tile.</summary>
     public const string ARENA_DEFAULT_FLOOR_TEXTURE_NAME = "tile-stage-1-moody-swampd";
-    public const float ISOMETRIC_CAMERA_OFFSET_Y = 11.2f;   // 30% closer than previous 16
-    public const float ISOMETRIC_CAMERA_OFFSET_Z = -13.44f; // 30% closer than previous -19.2
+    public const float ISOMETRIC_CAMERA_OFFSET_Y = 12.32f;   // 10% farther than previous 11.2
+    public const float ISOMETRIC_CAMERA_OFFSET_Z = -14.784f; // 10% farther than previous -13.44
     public const int ISOMETRIC_SORT_BASE_ORDER = 1000;
     public const int ISOMETRIC_SORT_SCALE = 10;
     public const int ISOMETRIC_SORT_PROJECTILE_ORDER = 10000;
