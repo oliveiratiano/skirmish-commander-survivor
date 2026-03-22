@@ -6,6 +6,7 @@ public class UnitAIController : MonoBehaviour
 {
     public UnitData data;
     public bool IsPlayerUnit { get; private set; }
+    public bool UseCommanderTargeting { get; private set; }
 
     MovementComponent _movement;
     HealthComponent _health;
@@ -154,6 +155,7 @@ public class UnitAIController : MonoBehaviour
                 {
                     CommandState previousEffective = _effectiveCommand;
                     _effectiveCommand = _currentCommand;
+                    UseCommanderTargeting = _effectiveCommand == CommandState.Attack && IsWithinCommanderRadius();
                     if (_effectiveCommand == CommandState.Regroup)
                         EnterRegroupMode();
                     else if (previousEffective == CommandState.Regroup)
@@ -281,9 +283,42 @@ public class UnitAIController : MonoBehaviour
         }
     }
 
+    bool IsWithinCommanderRadius()
+    {
+        if (CommanderController.Instance == null) return false;
+        float dist = (CommanderController.Instance.transform.position - transform.position).sqrMagnitude;
+        return dist <= GameConstants.COMMANDER_RADIUS * GameConstants.COMMANDER_RADIUS;
+    }
+
+    Transform FindNearestEnemyToCommander()
+    {
+        if (CommanderController.Instance == null) return null;
+        Vector3 commanderPos = CommanderController.Instance.transform.position;
+        Transform best = null;
+        float bestDist = float.MaxValue;
+
+        for (int i = 0; i < AllEnemyUnits.Count; i++)
+        {
+            if (AllEnemyUnits[i] == null || !AllEnemyUnits[i].gameObject.activeInHierarchy) continue;
+            var h = AllEnemyUnits[i].GetComponent<HealthComponent>();
+            if (h != null && h.IsDead) continue;
+
+            float dist = (AllEnemyUnits[i].transform.position - commanderPos).sqrMagnitude;
+            if (dist < bestDist)
+            {
+                bestDist = dist;
+                best = AllEnemyUnits[i].transform;
+            }
+        }
+
+        return best;
+    }
+
     void HandleAttack()
     {
-        Transform nearest = FindNearest(AllEnemyUnits);
+        Transform nearest = UseCommanderTargeting
+            ? FindNearestEnemyToCommander()
+            : FindNearest(AllEnemyUnits);
         if (nearest == null)
         {
             ClearShootPrepState();

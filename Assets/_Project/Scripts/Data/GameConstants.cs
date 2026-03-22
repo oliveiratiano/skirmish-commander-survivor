@@ -9,7 +9,7 @@ public static class GameConstants
 
     public const float BOSS_SPAWN_TIME_1 = 60f;
     public const float BOSS_SPAWN_TIME_2 = 120f;
-    public const float BOSS_SPAWN_TIME_3 = 180f;
+    public const float BOSS_SPAWN_TIME_3 = WAVE_DURATION - 30f;
     public const float BOSS_MOVE_CHANGE_INTERVAL_MIN = 0.4f;
     public const float BOSS_MOVE_CHANGE_INTERVAL_MAX = 0.8f;
     public const float BOSS_APPROACH_WEIGHT = 0.6f; // 60% approach, 40% strafe

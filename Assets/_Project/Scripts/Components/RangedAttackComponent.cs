@@ -15,6 +15,7 @@ public class RangedAttackComponent : MonoBehaviour
 
     AudioSource _audioSource;
     AudioClip[] _shotClips;
+    UnitAIController _ai;
 
     static GameObject _projectilePrefab;
 
@@ -24,6 +25,7 @@ public class RangedAttackComponent : MonoBehaviour
     void Start()
     {
         _audioSource = GetComponent<AudioSource>();
+        _ai = GetComponent<UnitAIController>();
         _shotClips = LoadShotClips();
     }
 
@@ -194,7 +196,11 @@ public class RangedAttackComponent : MonoBehaviour
     Transform FindTarget()
     {
         if (isPlayerUnit)
+        {
+            if (_ai != null && _ai.UseCommanderTargeting)
+                return FindNearestToCommander(UnitAIController.AllEnemyUnits);
             return FindNearestIn(UnitAIController.AllEnemyUnits);
+        }
         if (forceCommanderTarget && CommanderController.Instance != null)
         {
             var h = CommanderController.Instance.GetComponent<HealthComponent>();
@@ -217,6 +223,26 @@ public class RangedAttackComponent : MonoBehaviour
             if (h != null && h.IsDead) continue;
 
             float d = (list[i].transform.position - transform.position).sqrMagnitude;
+            if (d < bestDist) { bestDist = d; best = list[i].transform; }
+        }
+
+        return best;
+    }
+
+    Transform FindNearestToCommander(System.Collections.Generic.List<UnitAIController> list)
+    {
+        if (CommanderController.Instance == null) return FindNearestIn(list);
+        Vector3 commanderPos = CommanderController.Instance.transform.position;
+        Transform best = null;
+        float bestDist = float.MaxValue;
+
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i] == null || !list[i].gameObject.activeInHierarchy) continue;
+            var h = list[i].GetComponent<HealthComponent>();
+            if (h != null && h.IsDead) continue;
+
+            float d = (list[i].transform.position - commanderPos).sqrMagnitude;
             if (d < bestDist) { bestDist = d; best = list[i].transform; }
         }
 
