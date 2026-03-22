@@ -14,7 +14,7 @@ public class WaveManager : MonoBehaviour
     public UnitData bossData;
     [Tooltip("Escort swarm bugs that form up around the boss. Fallback to enemyData with 30% speed if null.")]
     public UnitData escortData;
-    public int totalEnemies = 216;
+    public int totalEnemies = 259;
     public float baseSpawnInterval = 1.25f;
     public float minSpawnInterval = 0.17f;
 
@@ -30,7 +30,7 @@ public class WaveManager : MonoBehaviour
     const int BOSS_COUNT = 3;
     int _bossesSpawned;
     int _bossesKilled;
-    const int ESCORT_COUNT = 10;
+    const int ESCORT_COUNT = 12;
     int _escortKilled;
     Dictionary<GameObject, Action> _bossDeathHandlers = new Dictionary<GameObject, Action>();
 

@@ -87,6 +87,8 @@ public class ArenaBoundary : MonoBehaviour
         _dangerStrips = new GameObject[4];
         _edgeLines = new GameObject[4];
 
+        
+
         // Top strip
         _dangerStrips[0] = MakeQuad("DangerTop",
             new Vector3(0f, half - dangerW / 2f, 0f),
