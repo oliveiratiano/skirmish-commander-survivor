@@ -77,6 +77,9 @@ public class RangedAttackComponent : MonoBehaviour
         Transform target = FindTarget();
         if (target == null) return;
 
+        float dist = (target.position - transform.position).magnitude;
+        if (dist > data.range) return;
+
         bool useSpray = data.sprayArcDegrees > 0f && data.burstCount > 1;
         if (useSpray)
         {
