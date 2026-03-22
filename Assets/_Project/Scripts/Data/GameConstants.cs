@@ -2,8 +2,8 @@ using UnityEngine;
 
 public static class GameConstants
 {
-    public const float ARENA_HALF_SIZE = 60f;
-    public const float ARENA_DANGER_ZONE_WIDTH = 5f;
+    public const float ARENA_HALF_SIZE = 48f;
+    public const float ARENA_DANGER_ZONE_WIDTH = 4f;
     public const float ARENA_SAFE_HALF_SIZE = ARENA_HALF_SIZE - ARENA_DANGER_ZONE_WIDTH;
     public const float DANGER_ZONE_DPS = 15f;
 
