@@ -685,7 +685,7 @@ public class UnitAIController : MonoBehaviour
 
     bool IsShootPrepCommitted()
     {
-        if (_shootPrepPhase == ShootPrepPhase.OutOfRange) return false;
+        if (_shootPrepPhase != ShootPrepPhase.Preparing) return false;
         if (_shootPrepTarget == null || !_shootPrepTarget.gameObject.activeInHierarchy) return false;
         var h = _shootPrepTarget.GetComponent<HealthComponent>();
         if (h != null && h.IsDead) return false;
