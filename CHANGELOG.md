@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org).
 - Swarm bugs no longer get stuck in arena corners at end of wave: added desperation engage (last few enemies charge instead of fleeing) and rally-toward-peers retreat blending so scattered bugs regroup naturally
 
 ### Added
+- Commander Burst Attack: Space-key active skill with ammo/reload system, targeting, no-target buzz feedback, HUD ammo display with readiness states, shot and reload sound effects, and brighter projectile visuals (Slices 1–5 complete)
+- Burst fire reuses Commander's passive shot sound clips with pitch variance; reload-complete plays subtle cue per recharged shot
+
+### Changed
+- Enemy hit sounds reduced to 70% volume for better audio mix balance
 - Placeholder audio files for commands (attack, standground, regroup, follow), unit responses (3 tiers), and hit sounds (player/enemy) — 2 variants each for random variation
 - Hit sound playback: ProjectileComponent now calls `AudioManager.PlayHitSound()` on projectile impact, with global cooldown throttling
 - Commander sprite sheet support: optional `commanderSprites` (12 frames) on GameManager; when set, Commander uses SpriteRenderer and SpriteSheetAnimator (idle 0–2, walk 3–8, shoot 9–10); fallback to colored quad when unset.

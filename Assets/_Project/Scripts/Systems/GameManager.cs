@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 
     [Header("References")]
     public UnitData commanderData;
+    public CommanderActionsData commanderActionsData;
     [Tooltip("Ordered: index 0 = key 1, 1 = key 2, 2 = key 3. Same as DraftUI available units.")]
     public UnitData[] playerUnitTypes;
 
@@ -53,6 +54,9 @@ public class GameManager : MonoBehaviour
         attack.isPlayerUnit = true;
         ConfigureShotAudio(CommanderObject);
 
+        var burst = CommanderObject.AddComponent<CommanderBurstAttack>();
+        burst.actionsData = commanderActionsData;
+
         CommanderObject.AddComponent<HitFlashComponent>();
         CommanderObject.AddComponent<ProceduralAnimator>();
         CommanderObject.AddComponent<IsometricSorting>();
@@ -87,6 +91,9 @@ public class GameManager : MonoBehaviour
         attack.data = commanderData;
         attack.isPlayerUnit = true;
         ConfigureShotAudio(go);
+
+        var burst = go.AddComponent<CommanderBurstAttack>();
+        burst.actionsData = commanderActionsData;
 
         go.AddComponent<HitFlashComponent>();
         go.AddComponent<ProceduralAnimator>();

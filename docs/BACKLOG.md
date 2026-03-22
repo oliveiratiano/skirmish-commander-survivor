@@ -275,7 +275,7 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -289,7 +289,7 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -303,7 +303,7 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
@@ -322,21 +322,21 @@ _(None at this time. Arena floor refactor is complete; no floor-related issues r
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 
 ### Slice 5: Visual + Audio Polish
 
-**What:** Burst fire sound (distinct from passive shot). Clips at `Resources/Audio/SFX/Skills/skill_burst_fire_0`. Reload-complete sound cue at `Resources/Audio/SFX/Skills/skill_burst_reload_0`. Tune brightness difference on projectile to feel right. Optional: subtle muzzle flash on burst.
+**What:** Burst fires reuse Commander's passive shot sound (same clips loaded by `RangedAttackComponent`). Reload-complete sound cue at `Resources/Audio/SFX/Skills/skill_burst_reload_0`. Tune brightness difference on projectile to feel right. Optional: subtle muzzle flash on burst.
 
 **Files:** `CommanderBurstAttack.cs`, `AudioManager.cs`, placeholder audio clips
 
-**Test:** Burst attack looks and sounds distinct from passive. Reload sound plays per shot recharged. Audio doesn't spam on rapid fire. Visual states, sounds, and firing all feel cohesive.
+**Test:** Burst attack sounds like passive shots. Reload sound plays per shot recharged. Audio doesn't spam on rapid fire. Visual states, sounds, and firing all feel cohesive.
 
 | Status |
 |--------|
-| [ ] Not started |
+| [x] Done |
 
 ---
 

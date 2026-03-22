@@ -147,9 +147,11 @@ public static class ProjectSetup
         CopySwarmBugSpritesToBoss();
         CopySwarmBugSpritesToEscort();
 
+        CreateCommanderActionsData();
+
         AssetDatabase.SaveAssets();
         AssetDatabase.Refresh();
-        Debug.Log("[ProjectSetup] All UnitData assets created in " + DATA_PATH);
+        Debug.Log("[ProjectSetup] All data assets created in " + DATA_PATH);
     }
 
     [MenuItem("Commander Survival/2. Build Game Scene", priority = 2)]
@@ -161,6 +163,7 @@ public static class ProjectSetup
 
         // Load data assets (must exist — run step 1 first)
         var commanderData = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/CommanderData.asset");
+        var commanderActionsData = AssetDatabase.LoadAssetAtPath<CommanderActionsData>(DATA_PATH + "/CommanderActionsData.asset");
         var closeQuarters = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/CloseQuartersData.asset");
         var machineGunner = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/MachineGunnerData.asset");
         var sharpshooter = AssetDatabase.LoadAssetAtPath<UnitData>(DATA_PATH + "/SharpshooterData.asset");
@@ -197,6 +200,7 @@ public static class ProjectSetup
         GameObject gmGO = CreateEmpty("GameManager");
         var gm = gmGO.AddComponent<GameManager>();
         gm.commanderData = commanderData;
+        gm.commanderActionsData = commanderActionsData;
         gm.playerUnitTypes = new UnitData[] { closeQuarters, machineGunner, sharpshooter };
 
         GameObject spawnerGO = CreateEmpty("UnitSpawner");
@@ -376,6 +380,20 @@ public static class ProjectSetup
         EnsureDirectory(ART_PATH);
         // Only Art/ is ensured. Do not create unit subfolders (Commander, CloseQuarters, etc.);
         // users place sprite sheets where they want under Art/ and the import script does not create directories.
+    }
+
+    static void CreateCommanderActionsData()
+    {
+        string path = DATA_PATH + "/CommanderActionsData.asset";
+        var existing = AssetDatabase.LoadAssetAtPath<CommanderActionsData>(path);
+        if (existing != null)
+        {
+            Debug.Log("[ProjectSetup] CommanderActionsData already exists, skipping.");
+            return;
+        }
+
+        var asset = ScriptableObject.CreateInstance<CommanderActionsData>();
+        AssetDatabase.CreateAsset(asset, path);
     }
 
     static void CopySwarmBugSpritesToBoss()

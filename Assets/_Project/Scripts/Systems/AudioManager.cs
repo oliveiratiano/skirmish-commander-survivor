@@ -31,6 +31,9 @@ public class AudioManager : MonoBehaviour
     Dictionary<string, AudioClip[]> _deathClipsByUnit = new Dictionary<string, AudioClip[]>();
     AudioClip[] _hitPlayerClips;
     AudioClip[] _hitEnemyClips;
+    AudioClip[] _burstNoTargetClips;
+    AudioClip[] _burstReloadClips;
+    AudioClip[] _commanderShotClips;
 
     // _uiSource: 2D, for command shouts and unit responses (not positional)
     AudioSource _uiSource;
@@ -98,6 +101,21 @@ public class AudioManager : MonoBehaviour
             _lastEnemyDeathSoundTime = Time.time;
     }
 
+    public void PlayBurstNoTarget()
+    {
+        Play2D(_burstNoTargetClips, 0.05f, 0.8f);
+    }
+
+    public void PlayBurstShot()
+    {
+        Play2D(_commanderShotClips, GameConstants.SHOT_AUDIO_PITCH_VARIANCE, 0.9f);
+    }
+
+    public void PlayBurstReload()
+    {
+        Play2D(_burstReloadClips, 0.06f, 0.5f);
+    }
+
     public void PlayHitSound(bool isEnemy, Vector3 position)
     {
         if (Time.time - _lastHitSoundTime < GameConstants.HIT_SOUND_COOLDOWN)
@@ -105,7 +123,8 @@ public class AudioManager : MonoBehaviour
 
         AudioClip clip = PickRandom(isEnemy ? _hitEnemyClips : _hitPlayerClips);
         if (clip == null) return;
-        PlaySpatial(clip, position, GameConstants.SHOT_AUDIO_PITCH_VARIANCE);
+        float volume = isEnemy ? 0.7f : 1f;
+        PlaySpatial(clip, position, GameConstants.SHOT_AUDIO_PITCH_VARIANCE, volume);
         _lastHitSoundTime = Time.time;
     }
 
@@ -126,6 +145,10 @@ public class AudioManager : MonoBehaviour
 
         _hitPlayerClips = LoadClips("Audio/SFX/Hits/hit_player");
         _hitEnemyClips  = LoadClips("Audio/SFX/Hits/hit_enemy");
+
+        _burstNoTargetClips = LoadClips("Audio/SFX/Skills/skill_burst_notarget");
+        _burstReloadClips = LoadClips("Audio/SFX/Skills/skill_burst_reload");
+        _commanderShotClips = LoadClips("Audio/SFX/Weapons/shot_commander");
     }
 
     // Loads Audio/SFX/.../name_0, name_1, ... until Resources.Load returns null.
@@ -183,7 +206,7 @@ public class AudioManager : MonoBehaviour
         _uiSource.PlayOneShot(clip, volume);
     }
 
-    void PlaySpatial(AudioClip clip, Vector3 position, float pitchVariance)
+    void PlaySpatial(AudioClip clip, Vector3 position, float pitchVariance, float volume = 1f)
     {
         if (CommanderController.Instance != null)
         {
@@ -192,7 +215,7 @@ public class AudioManager : MonoBehaviour
         }
 
         _spatialSource.pitch = 1f + Random.Range(-pitchVariance, pitchVariance);
-        _spatialSource.PlayOneShot(clip);
+        _spatialSource.PlayOneShot(clip, volume);
     }
 
     static AudioClip PickRandom(AudioClip[] clips)

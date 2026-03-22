@@ -4,6 +4,7 @@ public class BattleHUD : MonoBehaviour
 {
     GUIStyle _timerStyle;
     GUIStyle _infoStyle;
+    GUIStyle _ammoStyle;
     HealthComponent _commanderHealth;
 
     void OnEnable()
@@ -72,6 +73,79 @@ public class BattleHUD : MonoBehaviour
             string enemyText = $"Enemies: {WaveManager.Instance.AliveCount} | Remaining: {WaveManager.Instance.RemainingToSpawn}";
             GUI.Label(new Rect(leftMargin, y, 280f, 25f), enemyText, _infoStyle);
         }
+
+        DrawAmmoIndicator();
+    }
+
+    void DrawAmmoIndicator()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.CommanderObject == null) return;
+        var burst = GameManager.Instance.CommanderObject.GetComponent<CommanderBurstAttack>();
+        if (burst == null) return;
+
+        int ammo = burst.CurrentAmmo;
+        int max = burst.MaxAmmo;
+        if (max <= 0) return;
+
+        bool isReloading = ammo < max && burst.CanReloadNow;
+
+        // Position: left of command HUD, vertically centered
+        const float stickW = 6f;
+        const float stickH = 20f;
+        const float gap = 3f;
+        const float pad = 8f;
+        float sticksW = max * stickW + (max - 1) * gap;
+        float boxW = sticksW + pad * 2f;
+        float boxH = stickH + pad * 2f + 18f;
+        float cmdLeftX = Screen.width / 2f - 260f;
+        float x = cmdLeftX - boxW - 16f;
+        float centerY = Screen.height - 60f;
+        float y = centerY - boxH / 2f;
+
+        // Label
+        string label = isReloading ? "BURST [SPACE] ..." : "BURST [SPACE]";
+        GUI.Label(new Rect(x, y, boxW, 18f), label, _ammoStyle);
+
+        // Translucent border box (same style as command buttons)
+        float borderY = y + 18f;
+        float borderH = stickH + pad * 2f;
+        GUI.Box(new Rect(x, borderY, boxW, borderH), "", GUI.skin.box);
+
+        // Sticks inside the border
+        float stickX = x + pad;
+        float stickY = borderY + pad;
+        Color oldColor = GUI.color;
+        Color loaded = new Color(0.5f, 0.5f, 0.5f);
+        Color empty = new Color(0.5f, 0.5f, 0.5f, 0.2f);
+
+        for (int i = 0; i < max; i++)
+        {
+            float sx = stickX + i * (stickW + gap);
+
+            if (i < ammo)
+            {
+                GUI.color = loaded;
+                GUI.DrawTexture(new Rect(sx, stickY, stickW, stickH), Texture2D.whiteTexture);
+            }
+            else if (i == ammo && isReloading)
+            {
+                // Empty background
+                GUI.color = empty;
+                GUI.DrawTexture(new Rect(sx, stickY, stickW, stickH), Texture2D.whiteTexture);
+                // Fill from bottom up based on reload progress
+                float progress = burst.ReloadProgress;
+                float fillH = stickH * progress;
+                GUI.color = loaded;
+                GUI.DrawTexture(new Rect(sx, stickY + stickH - fillH, stickW, fillH), Texture2D.whiteTexture);
+            }
+            else
+            {
+                GUI.color = empty;
+                GUI.DrawTexture(new Rect(sx, stickY, stickW, stickH), Texture2D.whiteTexture);
+            }
+        }
+
+        GUI.color = oldColor;
     }
 
     void InitStyles()
@@ -88,5 +162,10 @@ public class BattleHUD : MonoBehaviour
         _infoStyle.fontSize = 14;
         _infoStyle.alignment = TextAnchor.UpperLeft;
         _infoStyle.normal.textColor = Color.white;
+
+        _ammoStyle = new GUIStyle(GUI.skin.label);
+        _ammoStyle.fontSize = 12;
+        _ammoStyle.alignment = TextAnchor.UpperLeft;
+        _ammoStyle.normal.textColor = new Color(0.6f, 0.6f, 0.6f);
     }
 }
