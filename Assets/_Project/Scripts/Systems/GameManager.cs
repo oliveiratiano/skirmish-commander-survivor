@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
         Sprite[] first = up != null && up.Length > 0 ? up : (right != null && right.Length > 0 ? right : down);
         sr.sprite = first != null && first.Length > GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX ? first[GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX] : (first != null && first.Length > 0 ? first[0] : null);
         sr.material = new Material(Shader.Find("Sprites/Default"));
+        sr.material.mainTexture = Texture2D.whiteTexture;
         sr.material.color = Color.white;
 
         var move = go.AddComponent<MovementComponent>();
@@ -122,6 +123,7 @@ public class GameManager : MonoBehaviour
 
         Renderer r = go.GetComponent<Renderer>();
         Material mat = new Material(Shader.Find("Sprites/Default"));
+        mat.mainTexture = Texture2D.whiteTexture;
         mat.color = color;
         mat.enableInstancing = true;
         r.material = mat;

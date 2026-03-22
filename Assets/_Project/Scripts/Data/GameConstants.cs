@@ -2,8 +2,8 @@ using UnityEngine;
 
 public static class GameConstants
 {
-    public const float ARENA_HALF_SIZE = 48f;
-    public const float ARENA_DANGER_ZONE_WIDTH = 4f;
+    public const float ARENA_HALF_SIZE = 38f;
+    public const float ARENA_DANGER_ZONE_WIDTH = 3f;
     public const float ARENA_SAFE_HALF_SIZE = ARENA_HALF_SIZE - ARENA_DANGER_ZONE_WIDTH;
     public const float DANGER_ZONE_DPS = 15f;
 
@@ -51,14 +51,18 @@ public static class GameConstants
     public const float HIT_SOUND_COOLDOWN = 0.15f;         // min seconds between hit sounds per unit
     public const float COMMANDER_RADIUS = 2.5f;
 
+    // Camera
+    public const float CAMERA_BASE_SIZE = 8.4f;        // default orthographic size (30% closer than previous 12)
+    public const float CAMERA_SCROLL_MIN_SIZE = 4f;    // closest the player can zoom in
+
     // Isometric view: camera tilt and offset (shared with ProceduralAnimator quad tilt). Stronger angle = more obvious isometric look.
     public const float ISOMETRIC_CAMERA_ANGLE = 45f;
     /// <summary>Vertical tiling multiplier for arena floor so tiles appear square on the tilted plane. Tune here if you change ISOMETRIC_CAMERA_ANGLE.</summary>
     public const float ARENA_FLOOR_TILING_V_ASPECT = 2f;
     /// <summary>Default floor texture when none is assigned in ArenaSetup. Must be in a Resources folder (e.g. Resources/tile-stage-1-moody-swampd). Fallback is grass_tile.</summary>
     public const string ARENA_DEFAULT_FLOOR_TEXTURE_NAME = "tile-stage-1-moody-swampd";
-    public const float ISOMETRIC_CAMERA_OFFSET_Y = 16f;   // 20% closer than previous 20
-    public const float ISOMETRIC_CAMERA_OFFSET_Z = -19.2f; // 20% closer than previous -24
+    public const float ISOMETRIC_CAMERA_OFFSET_Y = 11.2f;   // 30% closer than previous 16
+    public const float ISOMETRIC_CAMERA_OFFSET_Z = -13.44f; // 30% closer than previous -19.2
     public const int ISOMETRIC_SORT_BASE_ORDER = 1000;
     public const int ISOMETRIC_SORT_SCALE = 10;
     public const int ISOMETRIC_SORT_PROJECTILE_ORDER = 10000;

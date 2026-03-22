@@ -177,7 +177,7 @@ public static class ProjectSetup
         // Configure Main Camera
         var cam = Camera.main;
         cam.orthographic = true;
-        cam.orthographicSize = 12f;
+        cam.orthographicSize = GameConstants.CAMERA_BASE_SIZE;
         cam.transform.position = new Vector3(0f, 0f, -10f);
         cam.backgroundColor = GameConstants.ARENA_COLOR;
         cam.gameObject.AddComponent<CameraController>();

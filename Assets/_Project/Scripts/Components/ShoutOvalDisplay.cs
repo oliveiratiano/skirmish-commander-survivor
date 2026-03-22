@@ -27,6 +27,7 @@ public class ShoutOvalDisplay : MonoBehaviour
         _line.receiveShadows = false;
 
         Material mat = new Material(Shader.Find("Sprites/Default"));
+        mat.mainTexture = Texture2D.whiteTexture;
         mat.color = new Color(0.45f, 0.75f, 1f, 0.32f);
         _line.material = mat;
         _line.startColor = new Color(0.45f, 0.75f, 1f, 0.35f);

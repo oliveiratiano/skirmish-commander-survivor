@@ -18,6 +18,7 @@ public class CommandFeedbackDisplay : MonoBehaviour
         if (_iconRenderer != null)
         {
             _iconRenderer.material = new Material(Shader.Find("Sprites/Default"));
+            _iconRenderer.material.mainTexture = Texture2D.whiteTexture;
             _iconRenderer.material.color = Color.white;
         }
         var col = go.GetComponent<Collider>();

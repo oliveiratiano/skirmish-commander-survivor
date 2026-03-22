@@ -149,6 +149,7 @@ public class ArenaBoundary : MonoBehaviour
 
         Renderer r = go.GetComponent<Renderer>();
         Material mat = new Material(Shader.Find("Sprites/Default"));
+        mat.mainTexture = Texture2D.whiteTexture;
         mat.color = color;
         r.material = mat;
         r.sortingOrder = sortOrder;

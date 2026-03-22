@@ -102,6 +102,7 @@ MonoBehaviour:
   burstCount: 5
   burstInterval: 0.1
   sprayArcDegrees: 0
+  leadFactor: 0.6
   projectileSpeed: 16
   projectileLifetime: 1.5
   projectileColor: {r: 1, g: 0.8, b: 0.2, a: 1}

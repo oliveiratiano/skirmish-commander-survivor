@@ -301,6 +301,7 @@ public class WaveManager : MonoBehaviour
         int idleIdx = GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX;
         sr.sprite = first != null && first.Length > idleIdx ? first[idleIdx] : (first != null && first.Length > 0 ? first[0] : null);
         sr.material = new Material(Shader.Find("Sprites/Default"));
+        sr.material.mainTexture = Texture2D.whiteTexture;
         sr.material.color = Color.white;
 
         var move = go.AddComponent<MovementComponent>();
@@ -361,6 +362,7 @@ public class WaveManager : MonoBehaviour
         int idleIdx = GameConstants.SPRITE_SHEET_IDLE_FRAME_INDEX;
         sr.sprite = first != null && first.Length > idleIdx ? first[idleIdx] : (first != null && first.Length > 0 ? first[0] : null);
         sr.material = new Material(Shader.Find("Sprites/Default"));
+        sr.material.mainTexture = Texture2D.whiteTexture;
         sr.material.color = Color.white;
 
         var move = go.AddComponent<MovementComponent>();

@@ -96,6 +96,7 @@ public class UnitAIController : MonoBehaviour
             if (r != null)
             {
                 var mat = new Material(Shader.Find("Sprites/Default"));
+                mat.mainTexture = Texture2D.whiteTexture;
                 mat.color = new Color(1f, 0.9f, 0.3f, 0.85f);
                 r.material = mat;
             }
