@@ -7,8 +7,11 @@ public class CommanderActionsData : ScriptableObject
     [Tooltip("Maximum shots the Commander can store.")]
     public int burstMaxAmmo = 10;
 
-    [Tooltip("Time in seconds to reload one shot.")]
+    [Tooltip("Time in seconds to reload one shot while moving.")]
     public float burstReloadTime = 2f;
+
+    [Tooltip("Time in seconds to reload one shot while stationary.")]
+    public float burstReloadTimeIdle = 1f;
 
     [Tooltip("Minimum interval between consecutive burst shots (hold or tap).")]
     public float burstFireInterval = 0.3f;

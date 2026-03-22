@@ -14,9 +14,8 @@ public class CommanderBurstAttack : MonoBehaviour
 
     public int CurrentAmmo => _currentAmmo;
     public int MaxAmmo => actionsData != null ? actionsData.burstMaxAmmo : 0;
-    public bool CanReloadNow => _currentAmmo < MaxAmmo && CanReload();
-    public float ReloadProgress => actionsData != null && actionsData.burstReloadTime > 0f
-        ? _reloadTimer / actionsData.burstReloadTime : 0f;
+    public bool CanReloadNow => _currentAmmo < MaxAmmo && _fireIntervalTimer <= 0f;
+    public float ReloadProgress => actionsData != null ? _reloadTimer / CurrentReloadTime : 0f;
 
     void Start()
     {
@@ -38,31 +37,30 @@ public class CommanderBurstAttack : MonoBehaviour
         UpdateFiring();
     }
 
+    float CurrentReloadTime
+    {
+        get
+        {
+            bool isMoving = InputHandler.Instance != null &&
+                            InputHandler.Instance.MoveInput.sqrMagnitude > 0.01f;
+            return isMoving ? actionsData.burstReloadTime : actionsData.burstReloadTimeIdle;
+        }
+    }
+
     void UpdateReload()
     {
         if (_currentAmmo >= actionsData.burstMaxAmmo) return;
-        if (!CanReload()) return;
+        if (_fireIntervalTimer > 0f) return;
 
+        float reloadTime = CurrentReloadTime;
         _reloadTimer += Time.deltaTime;
-        if (_reloadTimer >= actionsData.burstReloadTime)
+        if (_reloadTimer >= reloadTime)
         {
-            _reloadTimer -= actionsData.burstReloadTime;
+            _reloadTimer -= reloadTime;
             _currentAmmo++;
             AudioManager.Instance.PlayBurstReload();
             Debug.Log($"[BurstAttack] Reloaded! Ammo: {_currentAmmo}/{actionsData.burstMaxAmmo}");
         }
-    }
-
-    bool CanReload()
-    {
-        if (_fireIntervalTimer > 0f) return false;
-
-        if (CommanderController.Instance != null &&
-            InputHandler.Instance != null &&
-            InputHandler.Instance.MoveInput.sqrMagnitude > 0.01f)
-            return false;
-
-        return true;
     }
 
     void UpdateFiring()
