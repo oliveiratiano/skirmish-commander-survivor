@@ -61,6 +61,15 @@ public static class GameConstants
     public const float ARENA_FLOOR_TILING_V_ASPECT = 2f;
     /// <summary>Default floor texture when none is assigned in ArenaSetup. Must be in a Resources folder (e.g. Resources/tile-stage-1-moody-swampd). Fallback is grass_tile.</summary>
     public const string ARENA_DEFAULT_FLOOR_TEXTURE_NAME = "tile-stage-1-moody-swampd";
+    public const string ARENA_DEFAULT_RBORDER_TEXTURE_NAME = "rborder-stage-1-moody-swampd";
+    public const string ARENA_DEFAULT_LBORDER_TEXTURE_NAME = "lborder-stage-1-moody-swampd";
+    public const string ARENA_DEFAULT_NBORDER_TEXTURE_NAME = "nborder-stage-1-moody-swampd";
+    public const float ARENA_BORDER_SCALE_RIGHT = 3.75f;
+    public const float ARENA_BORDER_SCALE_LEFT = 3.75f;
+    public const float ARENA_BORDER_SCALE_NORTH = 2.5f;
+    public const float ARENA_BORDER_OFFSET_RIGHT = -5f;
+    public const float ARENA_BORDER_OFFSET_NORTH = -2f;
+    public static readonly Vector3 ARENA_FLOOR_CENTER = new Vector3(0f, 0f, -5f);
     public const float ISOMETRIC_CAMERA_OFFSET_Y = 11.2f;
     public const float ISOMETRIC_CAMERA_OFFSET_Z = -13.44f;
     public const int ISOMETRIC_SORT_BASE_ORDER = 1000;
